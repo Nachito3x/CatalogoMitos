@@ -20,10 +20,10 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
-export const save = (datos) => {
+export const save = async (datos) => {
   //addDoc es la función que se encarga de guardar los datos en la colección, recibe dos parámetros, la referencia a la colección y los datos a guardar
   //collection es la función que se encarga de crear una referencia a la colección, recibe dos parámetros, la referencia a la base de datos y el nombre de la colección
-  addDoc(collection(db, "contactos"), datos)
+  return await addDoc(collection(db, "contactos"), datos)
 }
 
 export const getData = (data) => {
@@ -43,7 +43,7 @@ export const getById = async (id) => {
   return docSnap.data()
 }
 
-export const editData = (id, datos) => {
+export const editData = async (id, datos) => {
   //updateDoc es la función que se encarga de actualizar los datos de un documento, recibe dos parámetros, la referencia a la colección y el id del documento a actualizar
-  updateDoc(doc(db, "contactos", id), datos)
+  return await updateDoc(doc(db, "contactos", id), datos)
 }

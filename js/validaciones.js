@@ -1,65 +1,108 @@
 //importamos la función save desde firebase.js para guardar los datos en la base de datos
 import { save, getData, deleteData, getById, editData } from "./firebase.js"
-let id = ''
-document.getElementById('btnGuardar').addEventListener('click', () => {
 
-    let msj = ''
-    document.querySelectorAll('form input,textarea').forEach(item => {
-        if (item.value.trim() == '') {
-            msj += `Debe ingresar el campo ${item.name} \n`
+let id = ''
+
+//DOMContentLoaded es un evento que se ejecuta cuando cargan elementos resolviendo conflictos
+window.addEventListener('DOMContentLoaded', () => {
+
+    // Reseteo customizado
+    const deckForm = document.getElementById('deckForm');
+    if (deckForm) {
+        deckForm.addEventListener('reset', () => {
+            setTimeout(() => {
+                if (window.updateStrategy) window.updateStrategy('Agro'); // valor por defecto al resetear
+                id = '';
+            }, 10);
+        });
+    }
+
+    document.getElementById('btnGuardar').addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        let msj = ''
+        document.querySelectorAll('#deckForm input:not([type="hidden"]), #deckForm textarea, #deckForm select').forEach(item => {
+            if (item.value.trim() == '') {
+                msj += `Debe ingresar el campo ${item.name} \n`
+            }
+        })
+
+        if (msj != '') {
+            window.showToast("<b>Faltan Datos:</b><br/>" + msj, 'error')
+            return false
+        }
+        else {
+            const originalBtnText = document.getElementById('btnGuardar').innerHTML;
+            document.getElementById('btnGuardar').innerHTML = "Consagrando...";
+            document.getElementById('btnGuardar').disabled = true;
+
+            try {
+                if (id == '') {
+                    const datos = {
+                        nombre: document.getElementById('deckName').value,
+                        expansion: document.getElementById('deckExpansion').value,
+                        estrategia: document.getElementById('deckStrategy').value,
+                        descripcion: document.getElementById('deckDesc').value,
+                        lista: document.getElementById('deckList').value
+                    }
+                    console.log(datos)
+                    await save(datos)
+                } else {
+                    const datos = {
+                        nombre: document.getElementById('deckName').value,
+                        expansion: document.getElementById('deckExpansion').value,
+                        estrategia: document.getElementById('deckStrategy').value,
+                        descripcion: document.getElementById('deckDesc').value,
+                        lista: document.getElementById('deckList').value
+                    }
+                    await editData(id, datos)
+                    id = ''
+                }
+                window.showToast('Mazo consagrado exitosamente en la bóveda.', 'success')
+                document.getElementById('deckForm').reset();
+            } catch (error) {
+                console.error("Error saving document: ", error);
+                window.showToast('Hubo un error al consagrar el mazo. Por favor, revisa tu conexión e inténtalo de nuevo.', 'error');
+            } finally {
+                document.getElementById('btnGuardar').innerHTML = originalBtnText;
+                document.getElementById('btnGuardar').disabled = false;
+            }
         }
     })
-    if (msj != '') {
-        alert(msj)
-        return false
-    }
-    else {
-        if (id == '') {
-            //datos es un objeto que captura todos los valores ingresados en el formulario
-            const datos = {
-                nombre: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                fecha: document.getElementById('birthdate').value,
-                mensaje: document.getElementById('message').value
-            }
-            console.log(datos)
-            save(datos)
-        } else {
-            const datos = {
-                nombre: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                fecha: document.getElementById('birthdate').value,
-                mensaje: document.getElementById('message').value
-            }
-            editData(id, datos)
-            id = ''
-        }
-        alert('Datos guardados correctamente')
-    }
-})
 
-//DOMContentLoaded es un evento que se ejecuta cuando el documento HTML ha sido completamente cargado y parseado, sin esperar a que las hojas de estilo, imágenes y subframes terminen de cargar
-window.addEventListener('DOMContentLoaded', () => {
-    //getData es una función que se encarga de escuchar los cambios en la colección de contactos, cada vez que hay un cambio en la colección, se ejecuta la función que recibe como parámetro, en este caso, una función que recibe un snapshot de la colección, el snapshot es un objeto que contiene toda la información de la colección, incluyendo los documentos y sus datos
     getData((coleccion) => {
         let tabla = ''
         coleccion.forEach(doc => {
-            //doc.data() es una función que se encarga de obtener los datos de cada documento, devuelve un objeto con los datos del documento
             const datos = doc.data()
             tabla += `
-                <tr>
-                    <td>${datos.nombre}</td>
-                    <td>${datos.email}</td>
-                    <td>${datos.fecha}</td>
-                    <td>${datos.mensaje}</td>
-                    <td>
-                        <button class="btnEliminar" id="${doc.id}">Eliminar</button>
-                        <button class="btnEditar" id="${doc.id}">Editar</button>
-                    </td>
-                </tr>
+            <!-- Deck Item -->
+            <div class="bg-surface-container-low p-4 hover:bg-surface-container-highest transition-colors flex items-center gap-4 group relative overflow-hidden">
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
+                <div class="w-16 h-16 bg-surface-container-lowest flex-shrink-0 border border-outline-variant/20 overflow-hidden">
+                    <div class="w-full h-full bg-[#f2ca50]/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[#f2ca50]/50" data-icon="book">book</span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-serif text-on-surface leading-tight">${datos.nombre}</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] bg-primary/20 text-primary px-2 py-0.5 font-bold uppercase tracking-tighter">${datos.estrategia}</span>
+                        <span class="text-[10px] text-outline uppercase tracking-widest font-medium">${datos.expansion}</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btnEditar p-2 text-primary/60 hover:text-primary transition-colors" id="${doc.id}">
+                        <span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+                    </button>
+                    <button class="btnEliminar p-2 text-error/60 hover:text-error transition-colors" id="${doc.id}">
+                        <span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+                    </button>
+                </div>
+            </div>
             `
         })
-        document.getElementById('tablaContactos').innerHTML = tabla
+        document.getElementById('deckContainer').innerHTML = tabla
+
         // permite eliminar el registro
         const btnEliminar = document.querySelectorAll('.btnEliminar')
         btnEliminar.forEach(btn => {
@@ -67,15 +110,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 deleteData(btn.id)
             })
         })
+
         // permite editar el registro
         const btnEditar = document.querySelectorAll('.btnEditar')
         btnEditar.forEach(btn => {
             btn.addEventListener('click', async () => {
                 const datos = await getById(btn.id)
-                document.getElementById('name').value = datos.nombre
-                document.getElementById('email').value = datos.email
-                document.getElementById('birthdate').value = datos.fecha
-                document.getElementById('message').value = datos.mensaje
+                document.getElementById('deckName').value = datos.nombre
+                document.getElementById('deckExpansion').value = datos.expansion
+                document.getElementById('deckDesc').value = datos.descripcion
+                document.getElementById('deckList').value = datos.lista
+                if (window.updateStrategy) window.updateStrategy(datos.estrategia)
                 id = btn.id
             })
         })
