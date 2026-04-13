@@ -32,40 +32,59 @@ window.addEventListener('DOMContentLoaded', () => {
             return false
         }
         else {
-            const originalBtnText = document.getElementById('btnGuardar').innerHTML;
-            document.getElementById('btnGuardar').innerHTML = "Consagrando...";
-            document.getElementById('btnGuardar').disabled = true;
+            const btnGuardar = document.getElementById('btnGuardar');
+            const deckForm = document.getElementById('deckForm');
+
+            if (!btnGuardar || !deckForm) {
+                console.error("No se encontró el botón de guardado o el formulario en el DOM.");
+                window.showToast("Error crítico de la interfaz.", "error");
+                return false;
+            }
+
+            const originalBtnText = btnGuardar.innerHTML;
+            btnGuardar.innerHTML = "Consagrando...";
+            btnGuardar.disabled = true;
 
             try {
+                const deckNameEl = document.getElementById('deckName');
+                const deckExpansionEl = document.getElementById('deckExpansion');
+                const deckStrategyEl = document.getElementById('deckStrategy');
+                const deckDescEl = document.getElementById('deckDesc');
+                const deckListEl = document.getElementById('deckList');
+
+                if (!deckNameEl || !deckExpansionEl || !deckStrategyEl || !deckDescEl || !deckListEl) {
+                    throw new Error("No se encontraron todos los inputs del formulario en el DOM.");
+                }
+
                 if (id == '') {
                     const datos = {
-                        nombre: document.getElementById('deckName').value,
-                        expansion: document.getElementById('deckExpansion').value,
-                        estrategia: document.getElementById('deckStrategy').value,
-                        descripcion: document.getElementById('deckDesc').value,
-                        lista: document.getElementById('deckList').value
+                        nombre: deckNameEl.value,
+                        expansion: deckExpansionEl.value,
+                        estrategia: deckStrategyEl.value,
+                        descripcion: deckDescEl.value,
+                        lista: deckListEl.value
                     }
                     console.log(datos)
                     await save(datos)
                 } else {
                     const datos = {
-                        nombre: document.getElementById('deckName').value,
-                        expansion: document.getElementById('deckExpansion').value,
-                        estrategia: document.getElementById('deckStrategy').value,
-                        descripcion: document.getElementById('deckDesc').value,
-                        lista: document.getElementById('deckList').value
+                        nombre: deckNameEl.value,
+                        expansion: deckExpansionEl.value,
+                        estrategia: deckStrategyEl.value,
+                        descripcion: deckDescEl.value,
+                        lista: deckListEl.value
                     }
                     await editData(id, datos)
                     id = ''
                 }
                 window.showToast('Mazo consagrado exitosamente en la bóveda.', 'success')
-                document.getElementById('deckForm').reset();
+                deckForm.reset();
             } catch (error) {
                 console.error("Error saving document: ", error);
-                window.showToast('Hubo un error al consagrar el mazo. Por favor, revisa tu conexión e inténtalo de nuevo.', 'error');
+                window.showToast('Hubo un error al consagrar el mazo u ocurrio un error de lectura. Por favor, asegúrese de recargar la página.', 'error');
             } finally {
-                document.getElementById('btnGuardar').innerHTML = originalBtnText;
-                document.getElementById('btnGuardar').disabled = false;
+                btnGuardar.innerHTML = originalBtnText;
+                btnGuardar.disabled = false;
             }
         }
     })
@@ -101,7 +120,12 @@ window.addEventListener('DOMContentLoaded', () => {
             </div>
             `
         })
-        document.getElementById('deckContainer').innerHTML = tabla
+        const deckContainer = document.getElementById('deckContainer');
+        if (deckContainer) {
+            deckContainer.innerHTML = tabla;
+        } else {
+            console.warn("Contenedor de mazos (deckContainer) no encontrado.");
+        }
 
         // permite eliminar el registro
         const btnEliminar = document.querySelectorAll('.btnEliminar')
