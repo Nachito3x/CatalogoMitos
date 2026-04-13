@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!-- documento html5  -->
+<html lang="en">
+<!-- no se ve en la página -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clase 1</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<!-- se ve en la página -->
+<body>
+    <h1>Clase 1</h1>
+    <h2  class="titulo2">Introducción a HTML</h2>
+    <p>HTML es el lenguaje de marcado utilizado para crear páginas web. Permite estructurar el contenido y definir su presentación.</p>
+    <h3>Elementos básicos de HTML</h3>
+    <!-- ul lista ordenada -->
+    <ul>
+        <li><strong>&lt;h1&gt; a &lt;h6&gt;</strong>: Encabezados de diferentes niveles.</li>
+        <li><strong>&lt;p&gt;</strong>: Párrafos de texto.</li>
+        <li><strong>&lt;a&gt;</strong>: Enlaces a otras páginas o recursos.</li>
+        <li><strong>&lt;img&gt;</strong>: Imágenes.</li>
+        <li><strong>&lt;ul&gt;</strong> y <strong>&lt;ol&gt;</strong>: Listas no ordenadas y ordenadas.</li>
+    </ul>
+    <h2  class="titulo2">Imagenes</h2>
+    <!-- img es la etiqueta para insertar imágenes, src es la ruta de la imagen y alt es el texto alternativo -->
+    <img src="img/images.png" alt="Imagen de ejemplo" width="200" height="100">
+
+    <img src="https://ausum.cloud/wp-content/uploads/2024/01/github-copilot-microsoft-ausum-cloud.png" alt="Imagen de ejemplo" width="200" height="100">
+
+    <hr>
+    <h2 class="titulo2">Contacto</h2>
+    <section class="contacto-layout">
+        <form>
+            <label for="name">Nombre:</label>
+            <!-- input text sirve para textos -->
+            <input type="text" id="name" name="name" placeholder="Ingrese su nombre">
+            <label for="email">Correo electrónico:</label>
+            <!-- input mail para correos electrónicos -->
+            <input type="email" id="email" name="email" placeholder="Ingrese su correo electrónico">
+            <label for="birthdate">Fecha de Nacimiento:</label>
+            <input type="date" id="birthdate" name="birthdate">
+            <br>
+            <label for="message">Mensaje:</label>
+            <textarea id="message" name="message" cols="5" rows="3" placeholder="Escribe tu mensaje aquí"></textarea>
+            <!-- los botones funcionan con la etiqueta form -->
+            <input type="reset" value="Limpiar">
+            <!-- <input type="submit" value="Enviar" onclick="validar(event)"> -->
+            <input type="button" value="Enviar" id="btnGuardar">
+        </form>
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo electrónico</th>
+                        <th>Fecha de Nacimiento</th>
+                        <th>Mensaje</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tablaContactos">
+                    <!-- Aquí se agregarán los contactos -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <script type="module" src="js/validaciones.js"></script>
+</body>
