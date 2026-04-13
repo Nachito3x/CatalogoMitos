@@ -6,14 +6,13 @@ import { addDoc, collection, getFirestore, onSnapshot, deleteDoc, updateDoc, doc
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC5EG433ZzTdqkfazkMMouqqLkZlkRsnTM",
-  authDomain: "formularioapp-8c919.firebaseapp.com",
-  projectId: "formularioapp-8c919",
-  storageBucket: "formularioapp-8c919.firebasestorage.app",
-  messagingSenderId: "776992313312",
-  appId: "1:776992313312:web:e180503eb7b2cd7c376585"
+  apiKey: "AIzaSyBUhZ2xZep0sBA3-q7dHHUOxsdi2cNz7k0",
+  authDomain: "catalogo-de-cartas-mitos.firebaseapp.com",
+  projectId: "catalogo-de-cartas-mitos",
+  storageBucket: "catalogo-de-cartas-mitos.firebasestorage.app",
+  messagingSenderId: "420518453867",
+  appId: "1:420518453867:web:1f98bf23469150c7d3872e"
 };
-
 
 
 // Initialize Firebase
