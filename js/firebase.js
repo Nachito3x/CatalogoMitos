@@ -23,27 +23,27 @@ const db = getFirestore(app);
 export const save = async (datos) => {
   //addDoc es la función que se encarga de guardar los datos en la colección, recibe dos parámetros, la referencia a la colección y los datos a guardar
   //collection es la función que se encarga de crear una referencia a la colección, recibe dos parámetros, la referencia a la base de datos y el nombre de la colección
-  return await addDoc(collection(db, "contactos"), datos)
+  return await addDoc(collection(db, "mazos"), datos)
 }
 
 export const getData = (data) => {
   //onSnapshot es la función que se encarga de escuchar los cambios en la colección, recibe dos parámetros, la referencia a la colección y una función que se ejecuta cada vez que hay un cambio en la colección
-  onSnapshot(collection(db, 'contactos'), data)
+  onSnapshot(collection(db, 'mazos'), data)
 }
 
 export const deleteData = (id) => {
   console.log(id)
   //deleteDoc es la función que se encarga de eliminar los datos de la colección, recibe dos parámetros, la referencia a la colección y el id del documento a eliminar
-  deleteDoc(doc(db, "contactos", id))
+  deleteDoc(doc(db, "mazos", id))
 }
 
 export const getById = async (id) => {
   //getDoc es la función que se encarga de obtener los datos de un documento, recibe dos parámetros, la referencia a la colección y el id del documento a obtener
-  const docSnap = await getDoc(doc(db, "contactos", id))
+  const docSnap = await getDoc(doc(db, "mazos", id))
   return docSnap.data()
 }
 
 export const editData = async (id, datos) => {
   //updateDoc es la función que se encarga de actualizar los datos de un documento, recibe dos parámetros, la referencia a la colección y el id del documento a actualizar
-  return await updateDoc(doc(db, "contactos", id), datos)
+  return await updateDoc(doc(db, "mazos", id), datos)
 }
