@@ -308,7 +308,7 @@
             <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-surface-container-low">
                 <!-- Contenedor Izquierdo (Galería) -->
                 <div id="modalGallery"
-                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 content-start">
+                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-4 gap-4 content-start">
                     <!-- Las cartas se cargarán y renderizarán aquí -->
                 </div>
                 <!-- Contenedor Derecho -->
@@ -454,14 +454,8 @@
 
                 // Procesar variables para una visualización optimizada de galería
                 gallery.innerHTML = cartasFiltradas.map(carta => `
-                    <div class="relative group cursor-pointer border border-outline-variant/20 rounded-md overflow-hidden bg-surface-container hover:border-primary/50 transition-colors shadow-lg hover:shadow-primary/10 hover:-translate-y-1 duration-300">
-                        <div class="aspect-[7/10] w-full bg-surface-container-lowest flex items-center justify-center overflow-hidden">
-                            ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src=''; this.parentElement.innerHTML='<span class=\\'text-[10px] text-outline/40 uppercase tracking-widest font-bold text-center\\'>Reliquia Perdida</span>';">` : `<span class="text-[10px] uppercase font-bold text-outline/40 tracking-widest text-center">Reliquia Perdida</span>`}
-                        </div>
-                        <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-[#131313] via-[#131313]/90 to-transparent">
-                            <p class="text-xs text-[#f2ca50] font-black uppercase tracking-wider truncate drop-shadow-md">${carta.nombre}</p>
-                            <p class="text-[10px] text-on-surface-variant truncate font-medium mt-0.5">${carta.tipo || '-'} ${carta.coste_oro !== undefined && carta.coste_oro !== null && carta.coste_oro !== "" ? `<span class="text-primary/50 mx-1">•</span> <span class="text-primary font-bold"><span class="material-symbols-outlined text-[10px] align-middle" data-icon="paid" style="font-variation-settings: 'FILL' 1;">paid</span>${carta.coste_oro}</span>` : ''}</p>
-                        </div>
+                    <div class="relative cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(242,202,80,0.3)] duration-200" title="${carta.nombre} - ${carta.tipo}">
+                        ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto rounded-md shadow-md" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
                     </div>
                 `).join('');
             }, 50);
