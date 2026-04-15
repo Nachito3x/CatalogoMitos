@@ -17,6 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (deckIdsEl) deckIdsEl.value = '';
                 if (deckListEl) deckListEl.value = '';
                 if (window.resetEstadoMazo) window.resetEstadoMazo();
+                if (window.syncDeckSummaryFields) window.syncDeckSummaryFields();
                 id = '';
             }, 10);
         });
@@ -188,11 +189,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (razaSelect && datos.raza) razaSelect.value = datos.raza
                 document.getElementById('deckList').value = datos.lista
                 document.getElementById('deckIds').value = datos.deckIds || ''
-                if (datos.deckIds && window.hidratarEstadoMazoDesdeIds) {
-                    window.hidratarEstadoMazoDesdeIds()
-                } else if (window.resetEstadoMazo) {
-                    window.resetEstadoMazo()
-                }
+                if (window.hidratarEstadoMazoDesdeIds) window.hidratarEstadoMazoDesdeIds()
                 if (window.updateStrategy) window.updateStrategy(datos.estrategia)
                 id = btn.id
             })
