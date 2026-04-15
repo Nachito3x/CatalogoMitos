@@ -96,6 +96,24 @@
             color: #e5e2e1;
             font-family: 'Newsreader', serif;
         }
+
+        /* Estilos de barra de desplazamiento para mantener el diseño oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0e; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4d4635; 
+            border-radius: 4px;
+            border: 2px solid #0e0e0e;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e9c349; 
+        }
     </style>
 </head>
 
@@ -437,6 +455,7 @@
         window.abrirModalSeleccionCartas = function () {
             const modal = document.getElementById('cardSelectionModal');
             const expansion = document.getElementById('deckExpansion').value;
+            const raza = document.getElementById('deckRaza').value; // Recuperado!
 
             // Limpiamos los filtros del modal para no arrastrar busquedas anteriores
             document.getElementById('modalSearchInput').value = '';
@@ -452,10 +471,20 @@
             setTimeout(() => {
                 const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace('faire', 'faerie').trim();
                 const expFiltro = normalizeText(expansion);
+                const razaFiltro = normalizeText(raza);
 
-                cartasPreFiltradas = cartasData.filter(c =>
-                    normalizeText(c.expansion) === expFiltro
-                );
+                cartasPreFiltradas = cartasData.filter(c => {
+                    // Primero, si no es de la expansión, se ignora.
+                    if (normalizeText(c.expansion) !== expFiltro) return false;
+                    
+                    // Si la carta es Aliado, DEBE coincidir con la Raza.
+                    // Si no es Aliado (Talisman, Arma, Oro, etc), se deja pasar siempre.
+                    if (normalizeText(c.tipo) === 'aliado') {
+                        return normalizeText(c.raza) === razaFiltro;
+                    }
+                    
+                    return true;
+                });
 
                 window.filtrarGaleria();
             }, 50);
