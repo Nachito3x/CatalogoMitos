@@ -102,17 +102,20 @@
             width: 8px;
             height: 8px;
         }
+
         ::-webkit-scrollbar-track {
-            background: #0e0e0e; 
+            background: #0e0e0e;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb {
-            background: #4d4635; 
+            background: #4d4635;
             border-radius: 4px;
             border: 2px solid #0e0e0e;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #e9c349; 
+            background: #e9c349;
         }
     </style>
 </head>
@@ -221,6 +224,7 @@
                                 <textarea id="deckList" name="Lista de Cartas" readonly
                                     class="w-full h-full min-h-[120px] bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif text-sm placeholder:text-outline/40 resize-none opacity-80"
                                     placeholder="Aquí aparecerán las cartas..."></textarea>
+                                <input type="hidden" id="deckIds" name="deckIds">
                             </div>
                             <div
                                 class="flex justify-center items-center bg-surface-container-lowest rounded-sm border border-outline-variant/10 p-4">
@@ -301,7 +305,8 @@
                         <span
                             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm"
                             data-icon="search">search</span>
-                        <input type="text" id="modalSearchInput" placeholder="Buscar..." oninput="window.filtrarGaleria()"
+                        <input type="text" id="modalSearchInput" placeholder="Buscar..."
+                            oninput="window.filtrarGaleria()"
                             class="w-full md:w-48 bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-2 pl-9 pr-3 rounded-sm text-sm font-serif placeholder:text-outline/40">
                     </div>
                     <select id="modalTypeFilter" onchange="window.filtrarGaleria()"
@@ -317,7 +322,7 @@
                         <button type="button"
                             onclick="document.getElementById('cardSelectionModal').classList.add('hidden')"
                             class="px-4 py-2 border border-outline-variant text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors rounded-sm">Cancelar</button>
-                        <button type="button"
+                        <button type="button" onclick="window.guardarMazoModal()"
                             class="px-4 py-2 border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors rounded-sm shadow-md">Guardar</button>
                     </div>
                 </div>
@@ -326,18 +331,40 @@
             <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-surface-container-low relative">
                 <!-- Contenedor Izquierdo (Galería) -->
                 <div id="modalGallery"
-                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-4 gap-4 content-start">
+                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-5 gap-4 content-start">
                     <!-- Las cartas se cargarán y renderizarán aquí -->
                 </div>
-                
+
                 <!-- Overlay de carta grande (Oculto por defecto) -->
-                <div id="modalImageOverlay" onclick="window.ocultarCartaGrande()" class="hidden absolute top-0 left-0 w-full md:w-2/3 h-full bg-[#0a0a0a]/90 z-50 items-center justify-center p-4 cursor-zoom-out backdrop-blur-sm transition-opacity duration-200">
-                    <img id="modalBigImage" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl drop-shadow-[0_0_40px_rgba(242,202,80,0.4)] transition-transform scale-95 duration-200">
+                <div id="modalImageOverlay" onclick="window.ocultarCartaGrande()"
+                    class="hidden absolute top-0 left-0 w-full md:w-2/3 h-full bg-[#0a0a0a]/90 z-50 items-center justify-center p-4 cursor-zoom-out backdrop-blur-sm transition-opacity duration-200">
+                    <img id="modalBigImage" src=""
+                        class="max-w-full max-h-full object-contain rounded-lg shadow-2xl drop-shadow-[0_0_40px_rgba(242,202,80,0.4)] transition-transform scale-95 duration-200">
                 </div>
 
                 <!-- Contenedor Derecho -->
-                <div class="w-full md:w-1/3 p-4 overflow-y-auto bg-surface-container-lowest/50">
-
+                <div
+                    class="w-full md:w-1/3 p-4 overflow-y-auto bg-surface-container-lowest/50 flex flex-col h-full space-y-4">
+                    <div class="border-b border-outline-variant/30 pb-3 shrink-0">
+                        <h4
+                            class="text-lg font-serif text-primary uppercase tracking-widest flex items-center justify-between">
+                            Cartas Seleccionadas
+                            <span class="text-xs text-outline font-sans tracking-normal"><strong id="selectedCountUI"
+                                    class="text-on-surface">0</strong>/49</span>
+                        </h4>
+                        <div
+                            class="mt-3 text-[11px] uppercase tracking-widest text-outline-variant font-bold grid grid-cols-2 gap-y-2">
+                            <p>Aliados: <span id="countAliadoUI" class="text-primary ml-1">0</span></p>
+                            <p>Oros: <span id="countOroUI" class="text-primary ml-1">0</span></p>
+                            <p>Talismanes: <span id="countTalismanUI" class="text-primary ml-1">0</span></p>
+                            <p>Armas: <span id="countArmaUI" class="text-primary ml-1">0</span></p>
+                            <p>Tótems: <span id="countTotemUI" class="text-primary ml-1">0</span></p>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto space-y-2 pr-2" id="selectedListUI">
+                        <div class="text-center text-outline/40 italic font-serif text-sm mt-10">Ninguna reliquia
+                            forjada aún...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -451,6 +478,18 @@
 
         let cartasPreFiltradas = [];
 
+        window.estadoMazo = {
+            cartas: {},
+            total: 0,
+            stats: {
+                'aliado': 0,
+                'oro': 0,
+                'talisman': 0,
+                'arma': 0,
+                'totem': 0
+            }
+        };
+
         // Abrir y cargar modal renderizado con las variables seleccionadas
         window.abrirModalSeleccionCartas = function () {
             const modal = document.getElementById('cardSelectionModal');
@@ -476,13 +515,13 @@
                 cartasPreFiltradas = cartasData.filter(c => {
                     // Primero, si no es de la expansión, se ignora.
                     if (normalizeText(c.expansion) !== expFiltro) return false;
-                    
+
                     // Si la carta es Aliado, DEBE coincidir con la Raza.
                     // Si no es Aliado (Talisman, Arma, Oro, etc), se deja pasar siempre.
                     if (normalizeText(c.tipo) === 'aliado') {
                         return normalizeText(c.raza) === razaFiltro;
                     }
-                    
+
                     return true;
                 });
 
@@ -517,9 +556,25 @@
             gallery.innerHTML = finalCards.map(carta => {
                 const secureImgUrl = carta.imagen_url ? carta.imagen_url.replace(/'/g, "\\'") : '';
                 const secureName = carta.nombre ? carta.nombre.replace(/'/g, "\\'") : 'Reliquia';
+                const cartaJSON = encodeURIComponent(JSON.stringify(carta));
+
+                const countEnMazo = window.estadoMazo.cartas[carta.nombre] ? window.estadoMazo.cartas[carta.nombre].cantidad : 0;
+                const isDisabled = countEnMazo >= 3 || (window.estadoMazo.total >= 49);
+                const disabledClasses = isDisabled ? "grayscale opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.5)] cursor-pointer";
+
                 return `
-                    <div class="relative cursor-zoom-in transition-transform transform-gpu hover:scale-110 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.5)] duration-200" title="${carta.nombre} - ${carta.tipo}" onclick="window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')">
-                        ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto rounded-md shadow-md" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
+                    <div class="relative group transition-all transform-gpu duration-200 border border-transparent rounded-md ${disabledClasses} overflow-hidden bg-surface-container" title="${carta.nombre} - ${carta.tipo}">
+                        <!-- Area clicable para selección -->
+                        <div onclick="${isDisabled ? '' : `window.agregarCartaMazo('${cartaJSON}')`}" class="absolute inset-0 z-10 w-full h-full"></div>
+                        
+                        ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto block" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
+                        
+                        <!-- Botón Ojo Detalle -->
+                        <div onclick="window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')" class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent flex items-end justify-center pb-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-pointer pointer-events-none group-hover:pointer-events-auto">
+                            <div class="flex items-center gap-1 text-[#e9c349] hover:text-white bg-black/80 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-[#e9c349]/30 transition-colors">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span> Detalle
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -531,11 +586,11 @@
             const imgEl = document.getElementById('modalBigImage');
             imgEl.src = imgUrl;
             imgEl.alt = nombre;
-            
+
             // Render visible but faded out
             container.classList.remove('hidden');
             container.classList.add('flex');
-            
+
             // Trigger animation
             setTimeout(() => {
                 imgEl.classList.remove('scale-95');
@@ -546,15 +601,129 @@
         window.ocultarCartaGrande = function () {
             const container = document.getElementById('modalImageOverlay');
             const imgEl = document.getElementById('modalBigImage');
-            
+
             imgEl.classList.remove('scale-100');
             imgEl.classList.add('scale-95');
-            
+
             setTimeout(() => {
                 container.classList.add('hidden');
                 container.classList.remove('flex');
                 imgEl.src = "";
             }, 200);
+        };
+
+        window.getTipoNormalizado = function (t) {
+            const raw = (t || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            if (raw.includes('talisman')) return 'talisman';
+            if (raw.includes('totem')) return 'totem';
+            return raw;
+        };
+
+        window.agregarCartaMazo = function (cartaEncoded) {
+            const carta = JSON.parse(decodeURIComponent(cartaEncoded));
+            const count = window.estadoMazo.cartas[carta.nombre] ? window.estadoMazo.cartas[carta.nombre].cantidad : 0;
+
+            if (count >= 3 || window.estadoMazo.total >= 49) return;
+
+            if (!window.estadoMazo.cartas[carta.nombre]) {
+                window.estadoMazo.cartas[carta.nombre] = { data: carta, cantidad: 1 };
+            } else {
+                window.estadoMazo.cartas[carta.nombre].cantidad++;
+            }
+            window.estadoMazo.total++;
+
+            const tipoNorm = window.getTipoNormalizado(carta.tipo);
+            if (window.estadoMazo.stats[tipoNorm] !== undefined) window.estadoMazo.stats[tipoNorm]++;
+
+            window.renderSelectedList();
+            window.filtrarGaleria(); // Para reactualizar los griseados en caso llegue al tope 3
+        };
+
+        window.quitarCartaMazo = function (nombreEncoded) {
+            const nombre = decodeURIComponent(nombreEncoded);
+            if (!window.estadoMazo.cartas[nombre]) return;
+
+            const carta = window.estadoMazo.cartas[nombre].data;
+            window.estadoMazo.cartas[nombre].cantidad--;
+            window.estadoMazo.total--;
+
+            const tipoNorm = window.getTipoNormalizado(carta.tipo);
+            if (window.estadoMazo.stats[tipoNorm] !== undefined) window.estadoMazo.stats[tipoNorm]--;
+
+            if (window.estadoMazo.cartas[nombre].cantidad <= 0) {
+                delete window.estadoMazo.cartas[nombre];
+            }
+
+            window.renderSelectedList();
+            window.filtrarGaleria(); // Para des-grisear
+        };
+
+        window.renderSelectedList = function () {
+            document.getElementById('selectedCountUI').innerText = window.estadoMazo.total;
+            document.getElementById('countAliadoUI').innerText = window.estadoMazo.stats.aliado;
+            document.getElementById('countOroUI').innerText = window.estadoMazo.stats.oro;
+            document.getElementById('countTalismanUI').innerText = window.estadoMazo.stats.talisman;
+            document.getElementById('countArmaUI').innerText = window.estadoMazo.stats.arma;
+            document.getElementById('countTotemUI').innerText = window.estadoMazo.stats.totem;
+
+            const container = document.getElementById('selectedListUI');
+            const items = Object.values(window.estadoMazo.cartas);
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="text-center text-outline/40 italic font-serif text-sm mt-10">Ninguna reliquia forjada aún...</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const nombreEnc = encodeURIComponent(item.data.nombre);
+                const img = item.data.imagen_url ? item.data.imagen_url : '';
+                return `
+                    <div onclick="window.quitarCartaMazo('${nombreEnc}')" class="flex items-center gap-3 p-2 bg-surface-container rounded cursor-pointer hover:bg-surface-container-high border border-transparent hover:border-error-container/50 transition-colors group">
+                        <div class="h-10 w-7 shrink-0 bg-surface-container-lowest flex items-center justify-center overflow-hidden rounded-sm relative">
+                            ${img ? `<img src="${img}" class="object-cover w-full h-full">` : '<span class="material-symbols-outlined text-[10px] text-outline/40">image</span>'}
+                            <div class="absolute inset-0 bg-error-container/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-on-surface text-[14px]">remove</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-on-surface font-bold truncate">${item.data.nombre}</p>
+                            <p class="text-[10px] text-primary/80 uppercase truncate">${item.data.tipo}</p>
+                        </div>
+                        <div class="shrink-0 text-sm font-black text-outline group-hover:text-error-container transition-colors">
+                            x${item.cantidad}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.guardarMazoModal = function () {
+            if (window.estadoMazo.total !== 49) {
+                window.showToast(`Debes forjar exactamente 49 reliquias. Te faltan ${49 - window.estadoMazo.total}.`, 'error');
+                return;
+            }
+
+            // Recopilar IDs
+            let ids = [];
+            Object.values(window.estadoMazo.cartas).forEach(item => {
+                for (let i = 0; i < item.cantidad; i++) {
+                    ids.push(item.data.id);
+                }
+            });
+            document.getElementById('deckIds').value = ids.join(',');
+
+            // Armar texto
+            const textSummary = `Aliados: ${window.estadoMazo.stats.aliado}
+Oros: ${window.estadoMazo.stats.oro}
+Talismanes: ${window.estadoMazo.stats.talisman}
+Armas: ${window.estadoMazo.stats.arma}
+Tótems: ${window.estadoMazo.stats.totem}`;
+
+            document.getElementById('deckList').value = textSummary;
+            window.showToast('Mazo guardado correctamente para su consagración.', 'success');
+
+            // Cerrar modal
+            document.getElementById('cardSelectionModal').classList.add('hidden');
         };
     </script>
     <script type="module" src="js/validaciones.js"></script>
