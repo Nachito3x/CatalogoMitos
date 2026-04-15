@@ -159,10 +159,8 @@
         <div class="flex flex-col gap-12">
             <!-- Form Section -->
             <section class="space-y-8">
-                <form id="deckForm" class="bg-surface-container-low p-8 rounded-lg shadow-2xl relative overflow-hidden">
-                    <div class="absolute inset-0 opacity-5 pointer-events-none"
-                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCefVbU6rtFaZMky4yRSiPNvC2BEPCdNqL2gXVOXQPtpRYKdoGSrf40Lij3C-zDNj85_f1dDPYrhV-A8FVd4mOebPGVL3nXoxMp0D_125hRW3l7RgqgXcniwG_wuorKwKRD1re_2C813n25dVQEUtpogixHgvbgnfcxjAV7_DN80J1EIRBj1v0oq_IVLCmcyNEl1oEpVWqnAWLlX6alWu94Pf3Gx6Lp1jyy-4E8nOmiX8q5U6rn2nGqLssi5TNzazSNtlxA2VzSjmY');">
-                    </div>
+                <form id="deckForm"
+                    class="bg-surface-container p-8 rounded-lg border border-outline-variant/20 shadow-[0_4px_32px_-4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(233,195,73,0.06)]">
                     <h2 class="text-2xl font-serif text-on-surface mb-8 border-b border-outline-variant/30 pb-4">Forjar
                         Nuevo Mazo</h2>
 
@@ -221,32 +219,51 @@
                             Cartas</label>
                         <div class="grid grid-cols-2 gap-4 items-stretch">
                             <div>
-                                <div id="deckListDisplay" class="w-full h-full min-h-[120px] bg-surface-container-lowest rounded-sm p-3 relative flex flex-col">
-                                    <p id="deckListEmpty" class="absolute inset-0 flex items-center justify-center text-outline/40 font-serif italic text-sm text-center leading-relaxed">Aquí aparecerán<br>las cartas...</p>
-                                    <div id="deckListContent" class="hidden flex-col gap-2 h-full">
-                                        <div class="flex items-baseline gap-1 mb-1">
-                                            <span id="dLCount" class="text-2xl font-bold font-serif text-primary leading-none">0</span>
-                                            <span class="text-xs font-serif text-outline">/49</span>
+                                <div id="deckListDisplay"
+                                    class="w-full min-h-[120px] bg-surface-container-high rounded-sm border border-outline-variant/25 flex flex-col overflow-hidden">
+                                    <!-- Estado vacío -->
+                                    <div id="deckListEmpty" class="flex-1 flex items-center justify-center p-4">
+                                        <p
+                                            class="text-outline/40 font-serif italic text-sm text-center leading-relaxed">
+                                            Aquí aparecerán<br>las cartas...</p>
+                                    </div>
+                                    <!-- Estado con datos -->
+                                    <div id="deckListContent" class="hidden flex-col">
+                                        <div class="px-4 pt-4 pb-3 border-b border-outline-variant/20">
+                                            <div class="flex items-baseline gap-1.5">
+                                                <span id="dLCount"
+                                                    class="text-2xl font-bold font-serif text-primary leading-none">0</span>
+                                                <span class="text-xs font-serif text-outline">/49 cartas</span>
+                                            </div>
                                         </div>
-                                        <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 flex-1">
-                                            <div class="flex justify-between items-center gap-1">
-                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Aliados</span>
+                                        <div class="grid grid-cols-2 gap-x-0 p-3 pt-2">
+                                            <div
+                                                class="flex justify-between items-center gap-2 py-1 pr-3 border-b border-outline-variant/15">
+                                                <span
+                                                    class="text-outline/70 uppercase text-[9px] tracking-widest">Aliados</span>
                                                 <span id="dLAliado" class="text-on-surface font-bold text-xs">0</span>
                                             </div>
-                                            <div class="flex justify-between items-center gap-1">
-                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Oros</span>
+                                            <div
+                                                class="flex justify-between items-center gap-2 py-1 pl-3 border-b border-l border-outline-variant/15">
+                                                <span
+                                                    class="text-outline/70 uppercase text-[9px] tracking-widest">Oros</span>
                                                 <span id="dLOro" class="text-on-surface font-bold text-xs">0</span>
                                             </div>
-                                            <div class="flex justify-between items-center gap-1">
-                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Talismanes</span>
+                                            <div
+                                                class="flex justify-between items-center gap-2 py-1 pr-3 border-b border-outline-variant/15">
+                                                <span
+                                                    class="text-outline/70 uppercase text-[9px] tracking-widest">Talismanes</span>
                                                 <span id="dLTalisman" class="text-on-surface font-bold text-xs">0</span>
                                             </div>
-                                            <div class="flex justify-between items-center gap-1">
-                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Armas</span>
+                                            <div
+                                                class="flex justify-between items-center gap-2 py-1 pl-3 border-b border-l border-outline-variant/15">
+                                                <span
+                                                    class="text-outline/70 uppercase text-[9px] tracking-widest">Armas</span>
                                                 <span id="dLArma" class="text-on-surface font-bold text-xs">0</span>
                                             </div>
-                                            <div class="flex justify-between items-center gap-1">
-                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Tótems</span>
+                                            <div class="flex justify-between items-center gap-2 py-1 pr-3">
+                                                <span
+                                                    class="text-outline/70 uppercase text-[9px] tracking-widest">Tótems</span>
                                                 <span id="dLTotem" class="text-on-surface font-bold text-xs">0</span>
                                             </div>
                                         </div>
@@ -370,42 +387,57 @@
                 </div>
 
                 <!-- Contenedor Derecho -->
-                <div class="w-full md:w-1/3 overflow-hidden bg-surface-container-lowest/50 flex flex-col">
+                <div class="w-full md:w-1/3 overflow-hidden bg-surface-container-lowest/30 flex flex-col">
                     <!-- Mitad superior: Stats -->
-                    <div class="h-1/2 p-3 flex flex-col gap-1.5 border-b border-outline-variant/30 overflow-hidden">
-                        <div class="flex items-baseline gap-1 mb-0.5">
-                            <span class="text-3xl font-bold font-serif text-primary leading-none" id="deckSelectedCount">0</span>
-                            <span class="text-sm font-serif text-outline">/49</span>
-                            <span class="text-[9px] uppercase tracking-widest text-outline ml-1 self-end pb-0.5">cartas</span>
+                    <div class="h-1/2 flex flex-col overflow-hidden border-b border-outline-variant/30">
+                        <!-- Contador principal -->
+                        <div class="px-5 pt-5 pb-4 border-b border-outline-variant/20 shrink-0">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-5xl font-bold font-serif text-primary leading-none"
+                                    id="deckSelectedCount">0</span>
+                                <div class="flex flex-col leading-none">
+                                    <span class="text-base font-serif text-outline">/49</span>
+                                    <span
+                                        class="text-[9px] uppercase tracking-widest text-outline/60 mt-0.5">cartas</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-0.5 flex-1">
-                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
-                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Aliados</span>
-                                <span id="countAliado" class="text-xs font-serif text-on-surface font-bold">0</span>
+                        <!-- Desglose por tipo -->
+                        <div class="flex flex-col flex-1 justify-around px-5 py-2">
+                            <div class="flex justify-between items-center">
+                                <span
+                                    class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Aliados</span>
+                                <span id="countAliado" class="text-sm font-serif text-primary font-bold">0</span>
                             </div>
-                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
-                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Oros</span>
-                                <span id="countOro" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            <div class="flex justify-between items-center">
+                                <span
+                                    class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Oros</span>
+                                <span id="countOro" class="text-sm font-serif text-primary font-bold">0</span>
                             </div>
-                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
-                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Talismanes</span>
-                                <span id="countTalisman" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            <div class="flex justify-between items-center">
+                                <span
+                                    class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Talismanes</span>
+                                <span id="countTalisman" class="text-sm font-serif text-primary font-bold">0</span>
                             </div>
-                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
-                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Armas</span>
-                                <span id="countArma" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            <div class="flex justify-between items-center">
+                                <span
+                                    class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Armas</span>
+                                <span id="countArma" class="text-sm font-serif text-primary font-bold">0</span>
                             </div>
-                            <div class="flex justify-between items-center py-0.5">
-                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Tótems</span>
-                                <span id="countTotem" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            <div class="flex justify-between items-center">
+                                <span
+                                    class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Tótems</span>
+                                <span id="countTotem" class="text-sm font-serif text-primary font-bold">0</span>
                             </div>
                         </div>
                     </div>
                     <!-- Mitad inferior: Lista de cartas seleccionadas -->
                     <div class="h-1/2 flex flex-col overflow-hidden">
-                        <p class="text-[9px] uppercase tracking-widest text-outline font-bold px-3 pt-2 pb-1 shrink-0">Cartas seleccionadas</p>
-                        <div id="deckCardList" class="flex-1 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5">
-                            <p class="text-outline/40 font-serif italic text-xs text-center mt-3">Sin cartas</p>
+                        <div class="px-5 py-3 border-b border-outline-variant/20 shrink-0">
+                            <p class="text-[10px] uppercase tracking-widest text-outline font-bold">En el mazo</p>
+                        </div>
+                        <div id="deckCardList" class="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-0.5">
+                            <p class="text-outline/40 font-serif italic text-xs text-center mt-4">Sin cartas</p>
                         </div>
                     </div>
                 </div>
@@ -775,10 +807,10 @@
                 const secureNombre = (carta.nombre || '').replace(/'/g, "\\'");
                 const imgUrl = carta.imagen_url || '';
                 return `
-                    <div class="flex items-center gap-2 px-1.5 py-1 rounded-sm hover:bg-surface-container cursor-pointer transition-colors" onclick="window.quitarCarta('${secureNombre}')">
-                        ${imgUrl ? `<img src="${imgUrl}" class="w-7 h-auto rounded-sm shrink-0" />` : `<div class="w-7 h-9 bg-surface-container rounded-sm shrink-0 border border-outline-variant/20"></div>`}
-                        <span class="flex-1 text-[11px] font-serif text-on-surface truncate leading-tight">${carta.nombre}</span>
-                        <span class="text-[10px] font-black text-primary shrink-0">x${count}</span>
+                    <div class="flex items-center gap-3 px-2 py-2 rounded-sm hover:bg-surface-container-high cursor-pointer transition-colors border-b border-outline-variant/10 last:border-0 group/item" onclick="window.quitarCarta('${secureNombre}')">
+                        ${imgUrl ? `<img src="${imgUrl}" class="w-10 h-auto rounded-sm shrink-0 shadow-md" />` : `<div class="w-10 h-[52px] bg-surface-container rounded-sm shrink-0 border border-outline-variant/20"></div>`}
+                        <span class="flex-1 text-xs font-serif text-on-surface leading-snug">${carta.nombre}</span>
+                        <span class="text-sm font-black text-primary shrink-0 group-hover/item:text-error transition-colors" title="Quitar una copia">x${count}</span>
                     </div>
                 `;
             }).join('');
