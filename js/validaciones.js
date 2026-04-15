@@ -112,6 +112,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         <span class="text-[10px] text-outline uppercase tracking-widest font-medium">${datos.expansion}</span>
                         ${datos.raza ? `<span class="text-[10px] text-outline uppercase tracking-widest font-medium border-l border-outline-variant/30 pl-2 ml-1">${datos.raza}</span>` : ''}
                     </div>
+                    ${(!datos.lista || datos.lista.split(',').filter(s => s.trim() !== '').length < 49) ? '<span class="text-[10px] text-error font-bold uppercase tracking-widest mt-1 inline-block">Incompleto</span>' : ''}
                 </div>
                 <div class="flex gap-2">
                     <button class="btnEditar p-2 text-primary/60 hover:text-primary transition-colors" id="${doc.id}">

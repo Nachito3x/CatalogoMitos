@@ -133,14 +133,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-6">
-                <button
-                    class="text-gray-400 hover:text-[#f2ca50] transition-all duration-300 scale-95 active:duration-75">
-                    <span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
-                </button>
-                <button
-                    class="text-gray-400 hover:text-[#f2ca50] transition-all duration-300 scale-95 active:duration-75">
-                    <span class="material-symbols-outlined" data-icon="settings">settings</span>
-                </button>
                 <div class="w-8 h-8 rounded-full overflow-hidden border border-[#d4af37]/30">
                     <img alt="Guardian Avatar" class="w-full h-full object-cover"
                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCefVbU6rtFaZMky4yRSiPNvC2BEPCdNqL2gXVOXQPtpRYKdoGSrf40Lij3C-zDNj85_f1dDPYrhV-A8FVd4mOebPGVL3nXoxMp0D_125hRW3l7RgqgXcniwG_wuorKwKRD1re_2C813n25dVQEUtpogixHgvbgnfcxjAV7_DN80J1EIRBj1v0oq_IVLCmcyNEl1oEpVWqnAWLlX6alWu94Pf3Gx6Lp1jyy-4E8nOmiX8q5U6rn2nGqLssi5TNzazSNtlxA2VzSjmY" />
@@ -169,7 +161,7 @@
                             <label class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Nombre
                                 del Mazo</label>
                             <input id="deckName" name="Nombre"
-                                class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm placeholder:text-outline/40 font-serif"
+                                class="w-full bg-surface-container-high border border-outline-variant/25 focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm placeholder:text-outline/40 font-serif"
                                 placeholder="Ej: Furia de Zeus" type="text" />
                         </div>
                         <div class="space-y-2">
@@ -181,9 +173,9 @@
                                 <button type="button" data-value="Agro" onclick="window.updateStrategy('Agro')"
                                     class="strategy-btn px-4 py-2 border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors">Agro</button>
                                 <button type="button" data-value="Control" onclick="window.updateStrategy('Control')"
-                                    class="strategy-btn px-4 py-2 border border-outline-variant text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors">Control</button>
+                                    class="strategy-btn px-4 py-2 bg-surface-container-high border border-outline-variant/25 text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors">Control</button>
                                 <button type="button" data-value="Mixto" onclick="window.updateStrategy('Mixto')"
-                                    class="strategy-btn px-4 py-2 border border-outline-variant text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors">Mixto</button>
+                                    class="strategy-btn px-4 py-2 bg-surface-container-high border border-outline-variant/25 text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors">Mixto</button>
                             </div>
                             <input type="hidden" id="deckStrategy" name="Estrategia" value="Agro">
                         </div>
@@ -194,7 +186,7 @@
                             <label class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Expansión
                                 Primaria</label>
                             <select id="deckExpansion" name="Expansión" onchange="window.updateRaces(this.value)"
-                                class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif">
+                                class="w-full bg-surface-container-high border border-outline-variant/25 focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif">
                                 <option value="Espada Sagrada">Espada Sagrada</option>
                                 <option value="Helénica">Helénica</option>
                                 <option value="Hijos de Daana">Hijos de Daana</option>
@@ -205,7 +197,7 @@
                             <label
                                 class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Raza</label>
                             <select id="deckRaza" name="Raza"
-                                class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif">
+                                class="w-full bg-surface-container-high border border-outline-variant/25 focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif">
                                 <option value="Caballero">Caballero</option>
                                 <option value="Dragón">Dragón</option>
                                 <option value="Faire">Faire</option>
@@ -272,7 +264,7 @@
                                 <input type="hidden" id="deckList" name="Lista de Cartas" value="">
                             </div>
                             <div
-                                class="flex justify-center items-center bg-surface-container-lowest rounded-sm border border-outline-variant/10 p-4">
+                                class="flex justify-center items-center bg-surface-container-high rounded-sm border border-outline-variant/25 p-4">
                                 <button type="button" onclick="window.abrirModalSeleccionCartas()"
                                     class="px-6 py-3 border border-primary/40 bg-primary/10 text-primary text-sm font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors shadow-sm w-full md:w-auto text-center">
                                     Seleccionar cartas
@@ -512,7 +504,7 @@
                 if (btn.getAttribute('data-value') === selectedValue) {
                     btn.className = "strategy-btn px-4 py-2 border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors";
                 } else {
-                    btn.className = "strategy-btn px-4 py-2 border border-outline-variant text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors";
+                    btn.className = "strategy-btn px-4 py-2 bg-surface-container-high border border-outline-variant/25 text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors";
                 }
             });
         };
