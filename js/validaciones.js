@@ -78,7 +78,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     id = ''
                 }
                 window.showToast('Mazo consagrado exitosamente en la bóveda.', 'success')
-                deckForm.reset();
+                if (window.limpiarFormulario) window.limpiarFormulario(); else deckForm.reset();
             } catch (error) {
                 console.error("Error saving document: ", error);
                 window.showToast('Hubo un error al consagrar el mazo u ocurrio un error de lectura. Por favor, asegúrese de recargar la página.', 'error');
@@ -168,7 +168,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (window.updateRaces) window.updateRaces(datos.expansion)
                 const razaSelect = document.getElementById('deckRaza');
                 if (razaSelect && datos.raza) razaSelect.value = datos.raza
-                document.getElementById('deckList').value = datos.lista
+                if (window.cargarListaCartas) window.cargarListaCartas(datos.lista || '');
                 if (window.updateStrategy) window.updateStrategy(datos.estrategia)
                 id = btn.id
             })

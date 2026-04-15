@@ -282,7 +282,7 @@
                     </div>
 
                     <div class="flex justify-end gap-4">
-                        <button type="reset"
+                        <button type="button" onclick="window.limpiarFormulario()"
                             class="px-8 py-3 text-outline text-sm font-bold uppercase tracking-widest hover:text-on-surface transition-colors">Descartar
                             / Limpiar</button>
                         <button type="button" id="btnGuardar"
@@ -669,6 +669,17 @@
         };
 
         window.guardarSeleccion = function () {
+            // Guardar IDs de cartas como string separado por comas en el input oculto
+            const ids = cartasSeleccionadas.map(c => c.id).join(',');
+            const hiddenInput = document.getElementById('deckList');
+            if (hiddenInput) hiddenInput.value = ids;
+
+            window.actualizarDisplayPrincipal();
+            document.getElementById('cardSelectionModal').classList.add('hidden');
+        };
+
+        // Actualiza el display visual de la lista de cartas en la página principal
+        window.actualizarDisplayPrincipal = function () {
             const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
             const tipos = { aliado: 0, oro: 0, talisman: 0, arma: 0, totem: 0 };
             cartasSeleccionadas.forEach(c => {
@@ -681,12 +692,6 @@
             });
 
             const total = cartasSeleccionadas.length;
-
-            // Actualizar input oculto para el form
-            const hiddenInput = document.getElementById('deckList');
-            if (hiddenInput) hiddenInput.value = `${total}/49 — Aliados:${tipos.aliado} Oros:${tipos.oro} Talismanes:${tipos.talisman} Armas:${tipos.arma} Tótems:${tipos.totem}`;
-
-            // Actualizar display visual en la página principal
             const emptyEl = document.getElementById('deckListEmpty');
             const contentEl = document.getElementById('deckListContent');
             const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -704,8 +709,30 @@
                 if (emptyEl) emptyEl.classList.remove('hidden');
                 if (contentEl) { contentEl.classList.add('hidden'); contentEl.classList.remove('flex'); }
             }
+        };
 
-            document.getElementById('cardSelectionModal').classList.add('hidden');
+        // Limpia el formulario completo, incluyendo la selección de cartas
+        window.limpiarFormulario = function () {
+            cartasSeleccionadas = [];
+            cartasSeleccionadasSnapshot = [];
+            const hiddenInput = document.getElementById('deckList');
+            if (hiddenInput) hiddenInput.value = '';
+            window.actualizarDisplayPrincipal();
+            const form = document.getElementById('deckForm');
+            if (form) form.reset();
+        };
+
+        // Reconstruye cartasSeleccionadas desde una string de IDs guardada en Firebase
+        window.cargarListaCartas = function (lista) {
+            if (!lista || lista.trim() === '') {
+                cartasSeleccionadas = [];
+            } else {
+                const ids = lista.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                cartasSeleccionadas = ids.map(id => cartasData.find(c => c.id === id)).filter(Boolean);
+            }
+            const hiddenInput = document.getElementById('deckList');
+            if (hiddenInput) hiddenInput.value = lista || '';
+            window.actualizarDisplayPrincipal();
         };
 
         window.seleccionarCarta = function (idx) {
