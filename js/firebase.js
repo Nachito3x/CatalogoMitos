@@ -1,49 +1,64 @@
+// Importamos las funciones necesarias del SDK de Firebase
+// initializeApp: inicializa la aplicación con la configuración del proyecto
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+
+// addDoc: agrega un nuevo documento a una colección
+// collection: referencia a una colección de la base de datos
+// getFirestore: obtiene la instancia de la base de datos Firestore
+// onSnapshot: escucha cambios en tiempo real en una colección
+// deleteDoc: elimina un documento
+// updateDoc: actualiza un documento existente
+// doc: crea una referencia a un documento específico por ID
+// getDoc: obtiene un documento una sola vez (sin escucha en tiempo real)
 import { addDoc, collection, getFirestore, onSnapshot, deleteDoc, updateDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
+// Configuración del proyecto Firebase
+// Estos valores son únicos del proyecto y vienen de la consola de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBUhZ2xZep0sBA3-q7dHHUOxsdi2cNz7k0",
   authDomain: "catalogo-de-cartas-mitos.firebaseapp.com",
   projectId: "catalogo-de-cartas-mitos",
   storageBucket: "catalogo-de-cartas-mitos.firebasestorage.app",
   messagingSenderId: "420518453867",
-  appId: "1:420518453867:web:1f98bf23469150c7d3872e"
+  appId: "1:420518453847:web:1f98bf23469150c7d3872e"
 };
 
-
-// Initialize Firebase
+// Inicializamos la aplicación Firebase con la configuración anterior
 const app = initializeApp(firebaseConfig);
 
-// Initialize Cloud Firestore and get a reference to the service
+// Obtenemos la instancia de Firestore (la base de datos)
 const db = getFirestore(app);
+
+// Guarda un nuevo mazo en la colección "mazos"
+// Recibe un objeto "datos" con: nombre, expansion, estrategia, raza, lista
+// Retorna una promesa con la referencia al documento creado
 export const save = async (datos) => {
-  //addDoc es la función que se encarga de guardar los datos en la colección, recibe dos parámetros, la referencia a la colección y los datos a guardar
-  //collection es la función que se encarga de crear una referencia a la colección, recibe dos parámetros, la referencia a la base de datos y el nombre de la colección
   return await addDoc(collection(db, "mazos"), datos)
 }
 
+// Escucha cambios en tiempo real en la colección "mazos"
+// Recibe una función "data" (callback) que se ejecuta automáticamente
+// cada vez que se agrega, modifica o elimina un mazo en Firebase
 export const getData = (data) => {
-  //onSnapshot es la función que se encarga de escuchar los cambios en la colección, recibe dos parámetros, la referencia a la colección y una función que se ejecuta cada vez que hay un cambio en la colección
   onSnapshot(collection(db, 'mazos'), data)
 }
 
+// Elimina un mazo de la colección por su ID de documento
+// El ID lo provee Firebase al crear el documento (no es el id de la carta)
 export const deleteData = (id) => {
   console.log(id)
-  //deleteDoc es la función que se encarga de eliminar los datos de la colección, recibe dos parámetros, la referencia a la colección y el id del documento a eliminar
   deleteDoc(doc(db, "mazos", id))
 }
 
+// Obtiene un único mazo por su ID de documento
+// Retorna los datos del documento como un objeto plano
 export const getById = async (id) => {
-  //getDoc es la función que se encarga de obtener los datos de un documento, recibe dos parámetros, la referencia a la colección y el id del documento a obtener
   const docSnap = await getDoc(doc(db, "mazos", id))
   return docSnap.data()
 }
 
+// Actualiza un mazo existente con nuevos datos
+// Recibe el ID del documento y el objeto con los campos a actualizar
 export const editData = async (id, datos) => {
-  //updateDoc es la función que se encarga de actualizar los datos de un documento, recibe dos parámetros, la referencia a la colección y el id del documento a actualizar
   return await updateDoc(doc(db, "mazos", id), datos)
 }

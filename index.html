@@ -442,13 +442,18 @@
         class="fixed bottom-24 md:bottom-8 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
-        // Sistema de notificaciones Toast
+        // ════════════════════════════════════════════════════════════════════
+        // SISTEMA DE NOTIFICACIONES TOAST
+        // Muestra mensajes emergentes en la esquina inferior derecha.
+        // Tipos disponibles: 'success' (verde/dorado), 'error' (rojo), 'warning'
+        // ════════════════════════════════════════════════════════════════════
         window.showToast = function (message, type = 'success') {
             const container = document.getElementById('toastContainer');
             if (!container) return;
 
             const toast = document.createElement('div');
 
+            // Definimos colores e íconos según el tipo de mensaje
             let bgClass = 'bg-surface-container-high';
             let borderClass = 'border-primary/30';
             let icon = 'info';
@@ -473,6 +478,7 @@
 
             toast.className = `flex flex-row items-center gap-3 px-4 py-3 min-w-[250px] max-w-sm rounded-lg border shadow-2xl pointer-events-auto transform transition-all duration-300 translate-y-8 opacity-0 ${bgClass} ${borderClass}`;
 
+            // Convertimos los saltos de línea en <br/> para mostrarlos correctamente
             const formattedMessage = message.replace(/\n/g, '<br/>');
 
             toast.innerHTML = `
@@ -485,34 +491,44 @@
 
             container.appendChild(toast);
 
-            // Entrada
+            // Animación de entrada: removemos las clases de opacidad/posición inicial
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-8', 'opacity-0');
             });
 
-            // Salida
+            // Animación de salida y eliminación del DOM tras 5 segundos
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-x-4');
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
         };
 
-        // Lógica visual de la UI de Estrategia
+        // ════════════════════════════════════════════════════════════════════
+        // ESTRATEGIA DE COMBATE
+        // Resalta visualmente el botón seleccionado (Agro/Control/Mixto)
+        // y actualiza el input hidden que guarda el valor para el formulario.
+        // ════════════════════════════════════════════════════════════════════
         window.updateStrategy = function (selectedValue) {
             document.getElementById('deckStrategy').value = selectedValue;
             document.querySelectorAll('.strategy-btn').forEach(btn => {
                 if (btn.getAttribute('data-value') === selectedValue) {
+                    // Estilo activo (seleccionado): fondo dorado translúcido
                     btn.className = "strategy-btn px-4 py-2 border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors";
                 } else {
+                    // Estilo inactivo (no seleccionado): fondo neutro
                     btn.className = "strategy-btn px-4 py-2 bg-surface-container-high border border-outline-variant/25 text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors";
                 }
             });
         };
 
-        // Lógica para actualizar las razas según la expansión seleccionada
+        // ════════════════════════════════════════════════════════════════════
+        // RAZAS POR EXPANSIÓN
+        // Cada expansión tiene sus propias razas disponibles.
+        // Al cambiar la expansión en el select, se regeneran las opciones de raza.
+        // ════════════════════════════════════════════════════════════════════
         window.updateRaces = function (expansion) {
             const razaSelect = document.getElementById('deckRaza');
-            razaSelect.innerHTML = '';
+            razaSelect.innerHTML = ''; // Limpiamos las opciones anteriores
 
             let opciones = [];
             if (expansion === 'Espada Sagrada') {
@@ -525,6 +541,7 @@
                 opciones = ['Sacerdote', 'Eterno', 'Faraón'];
             }
 
+            // Creamos y agregamos cada opción al select dinámicamente
             opciones.forEach(raza => {
                 const opt = document.createElement('option');
                 opt.value = raza;
@@ -533,12 +550,28 @@
             });
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // VARIABLES GLOBALES DEL SISTEMA DE CARTAS
+        // ════════════════════════════════════════════════════════════════════
+
+        // Todas las cartas cargadas desde el archivo JSON local
         let cartasData = [];
+
+        // Las cartas actualmente renderizadas en la galería del modal
+        // (después de aplicar filtros de expansión, raza, búsqueda y tipo)
         let finalCardsRendered = [];
+
+        // Las cartas que el usuario ha agregado al mazo (permite duplicados)
+        // Ejemplo: [carta_A, carta_A, carta_B] = 2 copias de A y 1 de B
         let cartasSeleccionadas = [];
+
+        // Copia del estado de cartasSeleccionadas justo al abrir el modal.
+        // Se usa para restaurar si el usuario presiona "Cancelar".
         let cartasSeleccionadasSnapshot = [];
 
-        // Cargar cartas JSON original al iniciar de forma asíncrona
+        // Cargamos el archivo JSON con todas las cartas disponibles al iniciar.
+        // fetch es asíncrono, así que cartasData estará disponible poco después
+        // de que la página cargue.
         fetch('./json/Cartas_tionacho.json')
             .then(res => res.json())
             .then(data => {
@@ -546,39 +579,54 @@
             })
             .catch(err => console.error("Error cargando cartas localmente:", err));
 
+        // Cartas ya filtradas por expansión+raza, listas para filtrar por búsqueda/tipo
         let cartasPreFiltradas = [];
 
-        // Abrir y cargar modal renderizado con las variables seleccionadas
+        // ════════════════════════════════════════════════════════════════════
+        // ABRIR MODAL DE SELECCIÓN DE CARTAS
+        // Se ejecuta al presionar "Seleccionar Cartas".
+        // 1. Guarda un snapshot del estado actual para poder cancelar.
+        // 2. Muestra el modal con un spinner mientras filtra.
+        // 3. Filtra las cartas por expansión y raza seleccionadas en el form.
+        // 4. Renderiza la galería y actualiza el panel derecho.
+        // ════════════════════════════════════════════════════════════════════
         window.abrirModalSeleccionCartas = function () {
             const modal = document.getElementById('cardSelectionModal');
             const expansion = document.getElementById('deckExpansion').value;
-            const raza = document.getElementById('deckRaza').value; // Recuperado!
+            const raza = document.getElementById('deckRaza').value;
 
-            // Limpiamos los filtros del modal para no arrastrar busquedas anteriores
+            // Reseteamos los filtros internos del modal para evitar que se
+            // arrastren búsquedas o filtros de una apertura anterior
             document.getElementById('modalSearchInput').value = '';
             document.getElementById('modalTypeFilter').value = 'todo';
 
-            // Guardar snapshot para poder cancelar
+            // Guardamos el estado actual de selección para poder revertirlo si cancela
             cartasSeleccionadasSnapshot = [...cartasSeleccionadas];
 
-            // Mostrar modal inmediatamente
+            // Mostramos el modal inmediatamente
             modal.classList.remove('hidden');
 
+            // Mostramos un spinner mientras procesamos el filtrado
             const gallery = document.getElementById('modalGallery');
             gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50"><span class="material-symbols-outlined animate-spin text-4xl" style="animation: spin 2s linear infinite;">sync</span><span class="ml-3 font-serif italic text-sm">Forjando visuales...</span></div>';
 
-            // Usamos setTimeout(0) para ceder ejecución al paint del browser
+            // setTimeout con 50ms cede el control al navegador para que pinte
+            // el spinner antes de ejecutar el filtrado (que puede ser pesado)
             setTimeout(() => {
+                // normalizeText elimina tildes y pasa a minúsculas para comparar
+                // sin importar mayúsculas ni acentos. También corrige "faire" → "faerie"
                 const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace('faire', 'faerie').trim();
                 const expFiltro = normalizeText(expansion);
                 const razaFiltro = normalizeText(raza);
 
+                // Pre-filtramos cartasData por expansión y raza
                 cartasPreFiltradas = cartasData.filter(c => {
-                    // Primero, si no es de la expansión, se ignora.
+                    // Si la carta no es de la expansión seleccionada, se descarta
                     if (normalizeText(c.expansion) !== expFiltro) return false;
 
-                    // Si la carta es Aliado, DEBE coincidir con la Raza.
-                    // Si no es Aliado (Talisman, Arma, Oro, etc), se deja pasar siempre.
+                    // Los Aliados se filtran estrictamente por raza (solo se muestran
+                    // los aliados de la raza elegida). El resto de tipos (Oro, Arma,
+                    // Talismán, Tótem) no tienen raza y se incluyen siempre.
                     if (normalizeText(c.tipo) === 'aliado') {
                         return normalizeText(c.raza) === razaFiltro;
                     }
@@ -591,6 +639,12 @@
             }, 50);
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // FILTRAR GALERÍA
+        // Aplica el filtro de texto y el filtro de tipo sobre cartasPreFiltradas
+        // y re-renderiza todas las tarjetas en la galería del modal.
+        // Se llama al abrir el modal y cada vez que el usuario escribe o cambia el tipo.
+        // ════════════════════════════════════════════════════════════════════
         window.filtrarGaleria = function () {
             const gallery = document.getElementById('modalGallery');
             const searchVal = (document.getElementById('modalSearchInput').value || '').toLowerCase();
@@ -598,43 +652,76 @@
 
             let finalCards = cartasPreFiltradas;
 
+            // Aplicar filtro de texto (búsqueda por nombre, ignorando tildes)
             if (searchVal) {
                 const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
                 const searchNorm = normalizeText(searchVal);
                 finalCards = finalCards.filter(c => normalizeText(c.nombre).includes(searchNorm));
             }
 
+            // Aplicar filtro de tipo (Aliado, Oro, Arma, Talismán, Tótem)
             if (typeVal !== 'todo') {
                 const typeNorm = typeVal === 'talisman' ? 'talisman' : (typeVal === 'totem' ? 'totem' : typeVal);
                 const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
                 finalCards = finalCards.filter(c => normalizeText(c.tipo) === typeNorm);
             }
 
+            // Si no hay resultados, mostramos un mensaje vacío
             if (finalCards.length === 0) {
                 gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50 font-serif italic text-sm">No se encontraron reliquias con esos filtros.</div>';
                 return;
             }
 
+            // Guardamos las cartas visibles para poder acceder a ellas por índice
+            // cuando el usuario haga click en una carta
             finalCardsRendered = finalCards;
 
+            // Generamos el HTML de cada tarjeta de carta
             gallery.innerHTML = finalCards.map((carta, i) => {
+                // Escapamos las comillas simples para no romper el onclick inline
                 const secureImgUrl = carta.imagen_url ? carta.imagen_url.replace(/'/g, "\\'") : '';
                 const secureName = carta.nombre ? carta.nombre.replace(/'/g, "\\'") : 'Reliquia';
                 return `
-                    <div class="relative group transition-transform transform-gpu hover:scale-110 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.5)] duration-200 cursor-pointer" title="${carta.nombre} - ${carta.tipo}" data-idx="${i}" onclick="window.seleccionarCarta(${i})">
-                        ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto rounded-md shadow-md" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
+                    <div class="relative group transition-transform transform-gpu hover:scale-110 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.5)] duration-200 cursor-pointer"
+                         title="${carta.nombre} - ${carta.tipo}"
+                         data-idx="${i}"
+                         onclick="window.seleccionarCarta(${i})">
+
+                        <!-- Imagen de la carta. Si falla la carga, muestra un placeholder -->
+                        ${carta.imagen_url
+                            ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto rounded-md shadow-md"
+                               onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">`
+                            : `<div class="aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
+
+                        <!-- Badge dorado (arriba derecha) con cantidad de copias seleccionadas (x1, x2, x3).
+                             Oculto por defecto; se muestra con JS cuando se selecciona la carta. -->
                         <div class="card-count-badge hidden absolute top-1 right-1 bg-primary text-on-primary text-[9px] font-black rounded-full w-[18px] h-[18px] items-center justify-center shadow-md z-20 leading-none">1</div>
+
+                        <!-- Overlay oscuro que cubre la carta cuando está bloqueada
+                             (ya tiene 3 copias o el mazo está lleno con 49 cartas) -->
                         <div class="card-blocked-overlay hidden absolute inset-0 bg-black/65 rounded-md z-10"></div>
+
+                        <!-- Footer con botón "Detalles" que aparece al hacer hover.
+                             event.stopPropagation() evita que el click en el botón
+                             también dispare la selección de la carta. -->
                         <div class="absolute bottom-0 left-0 right-0 bg-black/70 rounded-b-md flex items-center justify-center py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-20">
-                            <button type="button" onclick="event.stopPropagation(); window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')" class="text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/50 px-2 py-1 hover:bg-primary/20 transition-colors rounded-sm">Detalles</button>
+                            <button type="button"
+                                onclick="event.stopPropagation(); window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')"
+                                class="text-[10px] font-bold uppercase tracking-widest text-primary border border-primary/50 px-2 py-1 hover:bg-primary/20 transition-colors rounded-sm">Detalles</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
+            // Actualizamos el estado visual de bloqueo/badge de todas las cartas
             window.actualizarEstadoCartas();
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // MOSTRAR / OCULTAR CARTA GRANDE
+        // Muestra un overlay con la imagen de la carta a tamaño completo.
+        // Se activa solo con el botón "Detalles", no al hacer click en la carta.
+        // ════════════════════════════════════════════════════════════════════
         window.mostrarCartaGrande = function (imgUrl, nombre) {
             if (!imgUrl) return;
             const container = document.getElementById('modalImageOverlay');
@@ -642,17 +729,38 @@
             imgEl.src = imgUrl;
             imgEl.alt = nombre;
 
-            // Render visible but faded out
+            // Hacemos visible el overlay
             container.classList.remove('hidden');
             container.classList.add('flex');
 
-            // Trigger animation
+            // Pequeño delay para que la transición CSS de escala funcione correctamente
             setTimeout(() => {
                 imgEl.classList.remove('scale-95');
                 imgEl.classList.add('scale-100');
             }, 10);
         };
 
+        window.ocultarCartaGrande = function () {
+            const container = document.getElementById('modalImageOverlay');
+            const imgEl = document.getElementById('modalBigImage');
+
+            // Animación de cierre: la imagen se reduce antes de ocultarse
+            imgEl.classList.remove('scale-100');
+            imgEl.classList.add('scale-95');
+
+            setTimeout(() => {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+                imgEl.src = ""; // Liberamos la imagen de la memoria
+            }, 200);
+        };
+
+        // ════════════════════════════════════════════════════════════════════
+        // CANCELAR SELECCIÓN
+        // Restaura cartasSeleccionadas al estado que tenía antes de abrir el modal
+        // (usando el snapshot guardado en abrirModalSeleccionCartas).
+        // No modifica el formulario ni la lista guardada en Firebase.
+        // ════════════════════════════════════════════════════════════════════
         window.cancelarSeleccion = function () {
             cartasSeleccionadas = [...cartasSeleccionadasSnapshot];
             window.actualizarEstadoCartas();
@@ -660,8 +768,16 @@
             document.getElementById('cardSelectionModal').classList.add('hidden');
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // GUARDAR SELECCIÓN
+        // Confirma la selección actual:
+        // 1. Convierte cartasSeleccionadas a una string de IDs separados por coma.
+        //    Ejemplo: [carta id:5, carta id:5, carta id:30] → "5,5,30"
+        // 2. Guarda esa string en el input hidden "deckList" para que se envíe
+        //    al guardar el formulario en Firebase.
+        // 3. Actualiza el display visual de la página principal.
+        // ════════════════════════════════════════════════════════════════════
         window.guardarSeleccion = function () {
-            // Guardar IDs de cartas como string separado por comas en el input oculto
             const ids = cartasSeleccionadas.map(c => c.id).join(',');
             const hiddenInput = document.getElementById('deckList');
             if (hiddenInput) hiddenInput.value = ids;
@@ -670,9 +786,16 @@
             document.getElementById('cardSelectionModal').classList.add('hidden');
         };
 
-        // Actualiza el display visual de la lista de cartas en la página principal
+        // ════════════════════════════════════════════════════════════════════
+        // ACTUALIZAR DISPLAY PRINCIPAL
+        // Refresca el bloque visual "Lista de Cartas" en la página principal.
+        // Cuenta cuántas cartas hay por tipo y muestra el contador total.
+        // Si cartasSeleccionadas está vacío, muestra el mensaje "Aquí aparecerán...".
+        // ════════════════════════════════════════════════════════════════════
         window.actualizarDisplayPrincipal = function () {
             const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+            // Contamos cartas por tipo
             const tipos = { aliado: 0, oro: 0, talisman: 0, arma: 0, totem: 0 };
             cartasSeleccionadas.forEach(c => {
                 const tipo = normalizeText(c.tipo);
@@ -684,11 +807,12 @@
             });
 
             const total = cartasSeleccionadas.length;
-            const emptyEl = document.getElementById('deckListEmpty');
-            const contentEl = document.getElementById('deckListContent');
+            const emptyEl = document.getElementById('deckListEmpty');   // div del estado vacío
+            const contentEl = document.getElementById('deckListContent'); // div del estado con datos
             const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
             if (total > 0) {
+                // Ocultamos el estado vacío y mostramos el contenido con los números
                 if (emptyEl) emptyEl.classList.add('hidden');
                 if (contentEl) { contentEl.classList.remove('hidden'); contentEl.classList.add('flex'); }
                 setEl('dLCount', total);
@@ -698,51 +822,93 @@
                 setEl('dLArma', tipos.arma);
                 setEl('dLTotem', tipos.totem);
             } else {
+                // Sin cartas: mostramos el placeholder y ocultamos el contenido
                 if (emptyEl) emptyEl.classList.remove('hidden');
                 if (contentEl) { contentEl.classList.add('hidden'); contentEl.classList.remove('flex'); }
             }
         };
 
-        // Limpia el formulario completo, incluyendo la selección de cartas
+        // ════════════════════════════════════════════════════════════════════
+        // LIMPIAR FORMULARIO
+        // Resetea completamente el formulario y la selección de cartas.
+        // Se llama desde: botón "Descartar/Limpiar" y tras guardar exitosamente.
+        // ════════════════════════════════════════════════════════════════════
         window.limpiarFormulario = function () {
+            // Vaciamos la selección de cartas y el snapshot
             cartasSeleccionadas = [];
             cartasSeleccionadasSnapshot = [];
+
+            // Limpiamos el input oculto que guarda los IDs de cartas
             const hiddenInput = document.getElementById('deckList');
             if (hiddenInput) hiddenInput.value = '';
+
+            // Actualizamos el display visual (vuelve al estado "vacío")
             window.actualizarDisplayPrincipal();
+
+            // Reseteamos los campos nativos del formulario (nombre, expansión, raza).
+            // Esto dispara el evento 'reset' que también resetea la estrategia a "Agro".
             const form = document.getElementById('deckForm');
             if (form) form.reset();
         };
 
-        // Reconstruye cartasSeleccionadas desde una string de IDs guardada en Firebase
+        // ════════════════════════════════════════════════════════════════════
+        // CARGAR LISTA DE CARTAS (desde Firebase al editar)
+        // Recibe la string de IDs guardada en Firebase y reconstruye el array
+        // cartasSeleccionadas buscando cada ID en cartasData.
+        // Ejemplo: "5,5,30" → [carta id:5, carta id:5, carta id:30]
+        // ════════════════════════════════════════════════════════════════════
         window.cargarListaCartas = function (lista) {
             if (!lista || lista.trim() === '') {
                 cartasSeleccionadas = [];
             } else {
+                // Separamos la string por comas, convertimos a números y descartamos NaN
                 const ids = lista.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                // Para cada ID, buscamos la carta correspondiente en cartasData
+                // filter(Boolean) elimina los undefined (si algún ID no existe en el JSON)
                 cartasSeleccionadas = ids.map(id => cartasData.find(c => c.id === id)).filter(Boolean);
             }
+
+            // Actualizamos el input oculto con la lista original
             const hiddenInput = document.getElementById('deckList');
             if (hiddenInput) hiddenInput.value = lista || '';
+
+            // Refrescamos el display visual de la página principal
             window.actualizarDisplayPrincipal();
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // SELECCIONAR CARTA (click en una carta de la galería)
+        // Agrega una copia de la carta a cartasSeleccionadas si:
+        // - El mazo no llegó a las 49 cartas (máximo permitido).
+        // - La carta no tiene ya 3 copias en el mazo (máximo por carta).
+        // ════════════════════════════════════════════════════════════════════
         window.seleccionarCarta = function (idx) {
             const carta = finalCardsRendered[idx];
             if (!carta) return;
 
             const total = cartasSeleccionadas.length;
+            // Contamos cuántas copias de esta carta ya están en el mazo
             const countByName = cartasSeleccionadas.filter(c => c.nombre === carta.nombre).length;
 
+            // Si se alcanzó algún límite, no hacemos nada
             if (total >= 49 || countByName >= 3) return;
 
             cartasSeleccionadas.push(carta);
-            window.actualizarEstadoCartas();
-            window.actualizarPanelDerecho();
+            window.actualizarEstadoCartas(); // Refresca bloqueos y badges en la galería
+            window.actualizarPanelDerecho(); // Refresca contadores y lista del panel derecho
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // ACTUALIZAR ESTADO VISUAL DE LAS CARTAS EN LA GALERÍA
+        // Recorre todas las tarjetas renderizadas y actualiza:
+        // - El badge dorado con la cantidad de copias seleccionadas.
+        // - El overlay de bloqueo (oscurece la carta cuando no se puede agregar más).
+        // - El cursor (pointer si disponible, not-allowed si bloqueada).
+        // ════════════════════════════════════════════════════════════════════
         window.actualizarEstadoCartas = function () {
             const total = cartasSeleccionadas.length;
+
+            // Construimos un mapa { nombreCarta: cantidadSeleccionada }
             const countByName = {};
             cartasSeleccionadas.forEach(c => {
                 countByName[c.nombre] = (countByName[c.nombre] || 0) + 1;
@@ -753,11 +919,13 @@
                 if (!carta) return;
 
                 const count = countByName[carta.nombre] || 0;
+                // La carta está bloqueada si el mazo está lleno O si ya tiene 3 copias
                 const blocked = total >= 49 || count >= 3;
 
                 const badge = div.querySelector('.card-count-badge');
                 const overlay = div.querySelector('.card-blocked-overlay');
 
+                // Actualizar badge de cantidad
                 if (count > 0) {
                     badge.textContent = count;
                     badge.classList.remove('hidden');
@@ -767,6 +935,7 @@
                     badge.classList.remove('flex');
                 }
 
+                // Actualizar overlay de bloqueo y cursor
                 if (blocked) {
                     overlay.classList.remove('hidden');
                     div.classList.remove('cursor-pointer');
@@ -779,10 +948,16 @@
             });
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // ACTUALIZAR PANEL DERECHO DEL MODAL
+        // Actualiza los contadores de la mitad superior (X/49 y por tipo)
+        // y llama a renderizarListaCartas para la mitad inferior.
+        // ════════════════════════════════════════════════════════════════════
         window.actualizarPanelDerecho = function () {
             const total = cartasSeleccionadas.length;
             const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+            // Contamos cartas por tipo
             const tipos = { aliado: 0, oro: 0, talisman: 0, arma: 0, totem: 0 };
             cartasSeleccionadas.forEach(c => {
                 const tipo = normalizeText(c.tipo);
@@ -793,6 +968,7 @@
                 else if (tipo === 'totem') tipos.totem++;
             });
 
+            // Actualizamos los elementos del panel derecho en el DOM
             const el = id => document.getElementById(id);
             if (el('deckSelectedCount')) el('deckSelectedCount').textContent = total;
             if (el('countAliado')) el('countAliado').textContent = tipos.aliado;
@@ -801,14 +977,22 @@
             if (el('countArma')) el('countArma').textContent = tipos.arma;
             if (el('countTotem')) el('countTotem').textContent = tipos.totem;
 
+            // Actualiza la lista de items en la mitad inferior del panel
             window.renderizarListaCartas();
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // RENDERIZAR LISTA DE CARTAS (mitad inferior del panel derecho)
+        // Agrupa cartasSeleccionadas por nombre y muestra cada carta única
+        // con su miniatura, nombre y cantidad (x1, x2, x3).
+        // Al hacer click en un ítem, se quita una copia de la carta.
+        // ════════════════════════════════════════════════════════════════════
         window.renderizarListaCartas = function () {
             const container = document.getElementById('deckCardList');
             if (!container) return;
 
-            // Agrupar por nombre
+            // Agrupamos las cartas por nombre para mostrarlas como ítems únicos con cantidad
+            // Ejemplo: [A, A, B] → { "A": {carta:A, count:2}, "B": {carta:B, count:1} }
             const grouped = {};
             cartasSeleccionadas.forEach(c => {
                 if (!grouped[c.nombre]) grouped[c.nombre] = { carta: c, count: 0 };
@@ -823,39 +1007,37 @@
             }
 
             container.innerHTML = items.map(({ carta, count }) => {
+                // Escapamos las comillas simples para el onclick inline
                 const secureNombre = (carta.nombre || '').replace(/'/g, "\\'");
                 const imgUrl = carta.imagen_url || '';
                 return `
-                    <div class="flex items-center gap-3 px-2 py-2 rounded-sm hover:bg-surface-container-high cursor-pointer transition-colors border-b border-outline-variant/10 last:border-0 group/item" onclick="window.quitarCarta('${secureNombre}')">
-                        ${imgUrl ? `<img src="${imgUrl}" class="w-10 h-auto rounded-sm shrink-0 shadow-md" />` : `<div class="w-10 h-[52px] bg-surface-container rounded-sm shrink-0 border border-outline-variant/20"></div>`}
+                    <div class="flex items-center gap-3 px-2 py-2 rounded-sm hover:bg-surface-container-high cursor-pointer transition-colors border-b border-outline-variant/10 last:border-0 group/item"
+                         onclick="window.quitarCarta('${secureNombre}')">
+                        <!-- Miniatura de la carta -->
+                        ${imgUrl
+                            ? `<img src="${imgUrl}" class="w-10 h-auto rounded-sm shrink-0 shadow-md" />`
+                            : `<div class="w-10 h-[52px] bg-surface-container rounded-sm shrink-0 border border-outline-variant/20"></div>`}
                         <span class="flex-1 text-xs font-serif text-on-surface leading-snug">${carta.nombre}</span>
+                        <!-- Cantidad de copias. Al hacer hover se vuelve rojo indicando que se puede quitar -->
                         <span class="text-sm font-black text-primary shrink-0 group-hover/item:text-error transition-colors" title="Quitar una copia">x${count}</span>
                     </div>
                 `;
             }).join('');
         };
 
+        // ════════════════════════════════════════════════════════════════════
+        // QUITAR CARTA
+        // Elimina la última copia agregada de la carta con el nombre dado.
+        // Si la carta tenía 2 copias, pasa a tener 1. Si tenía 1, desaparece.
+        // Usa lastIndexOf para eliminar la copia más reciente primero.
+        // ════════════════════════════════════════════════════════════════════
         window.quitarCarta = function (nombre) {
             const idx = cartasSeleccionadas.map(c => c.nombre).lastIndexOf(nombre);
             if (idx !== -1) {
-                cartasSeleccionadas.splice(idx, 1);
+                cartasSeleccionadas.splice(idx, 1); // Elimina 1 elemento en la posición idx
                 window.actualizarEstadoCartas();
                 window.actualizarPanelDerecho();
             }
-        };
-
-        window.ocultarCartaGrande = function () {
-            const container = document.getElementById('modalImageOverlay');
-            const imgEl = document.getElementById('modalBigImage');
-
-            imgEl.classList.remove('scale-100');
-            imgEl.classList.add('scale-95');
-
-            setTimeout(() => {
-                container.classList.add('hidden');
-                container.classList.remove('flex');
-                imgEl.src = "";
-            }, 200);
         };
     </script>
     <script type="module" src="js/validaciones.js"></script>
