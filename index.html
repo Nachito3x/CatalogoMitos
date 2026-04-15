@@ -221,9 +221,38 @@
                             Cartas</label>
                         <div class="grid grid-cols-2 gap-4 items-stretch">
                             <div>
-                                <textarea id="deckList" name="Lista de Cartas" readonly
-                                    class="w-full h-full min-h-[120px] bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-3 px-4 rounded-sm font-serif text-sm placeholder:text-outline/40 resize-none opacity-80"
-                                    placeholder="Aquí aparecerán las cartas..."></textarea>
+                                <div id="deckListDisplay" class="w-full h-full min-h-[120px] bg-surface-container-lowest rounded-sm p-3 relative flex flex-col">
+                                    <p id="deckListEmpty" class="absolute inset-0 flex items-center justify-center text-outline/40 font-serif italic text-sm text-center leading-relaxed">Aquí aparecerán<br>las cartas...</p>
+                                    <div id="deckListContent" class="hidden flex-col gap-2 h-full">
+                                        <div class="flex items-baseline gap-1 mb-1">
+                                            <span id="dLCount" class="text-2xl font-bold font-serif text-primary leading-none">0</span>
+                                            <span class="text-xs font-serif text-outline">/49</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 flex-1">
+                                            <div class="flex justify-between items-center gap-1">
+                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Aliados</span>
+                                                <span id="dLAliado" class="text-on-surface font-bold text-xs">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center gap-1">
+                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Oros</span>
+                                                <span id="dLOro" class="text-on-surface font-bold text-xs">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center gap-1">
+                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Talismanes</span>
+                                                <span id="dLTalisman" class="text-on-surface font-bold text-xs">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center gap-1">
+                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Armas</span>
+                                                <span id="dLArma" class="text-on-surface font-bold text-xs">0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center gap-1">
+                                                <span class="text-outline/60 uppercase text-[9px] tracking-wide">Tótems</span>
+                                                <span id="dLTotem" class="text-on-surface font-bold text-xs">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="deckList" name="Lista de Cartas" value="">
                             </div>
                             <div
                                 class="flex justify-center items-center bg-surface-container-lowest rounded-sm border border-outline-variant/10 p-4">
@@ -341,42 +370,42 @@
                 </div>
 
                 <!-- Contenedor Derecho -->
-                <div class="w-full md:w-1/3 p-4 overflow-y-auto bg-surface-container-lowest/50 flex flex-col gap-6">
-                    <!-- Conteo total -->
-                    <div class="text-center pt-2 pb-4 border-b border-outline-variant/30">
-                        <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-4xl font-bold font-serif text-primary" id="deckSelectedCount">0</span>
-                            <span class="text-xl font-serif text-outline">/49</span>
+                <div class="w-full md:w-1/3 overflow-hidden bg-surface-container-lowest/50 flex flex-col">
+                    <!-- Mitad superior: Stats -->
+                    <div class="h-1/2 p-3 flex flex-col gap-1.5 border-b border-outline-variant/30 overflow-hidden">
+                        <div class="flex items-baseline gap-1 mb-0.5">
+                            <span class="text-3xl font-bold font-serif text-primary leading-none" id="deckSelectedCount">0</span>
+                            <span class="text-sm font-serif text-outline">/49</span>
+                            <span class="text-[9px] uppercase tracking-widest text-outline ml-1 self-end pb-0.5">cartas</span>
                         </div>
-                        <p class="text-[10px] uppercase tracking-widest text-outline mt-1">Cartas seleccionadas</p>
+                        <div class="flex flex-col gap-0.5 flex-1">
+                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Aliados</span>
+                                <span id="countAliado" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Oros</span>
+                                <span id="countOro" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Talismanes</span>
+                                <span id="countTalisman" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-0.5 border-b border-outline-variant/10">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Armas</span>
+                                <span id="countArma" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-0.5">
+                                <span class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Tótems</span>
+                                <span id="countTotem" class="text-xs font-serif text-on-surface font-bold">0</span>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Desglose por tipo -->
-                    <div class="space-y-1">
-                        <p class="text-[10px] uppercase tracking-widest text-outline font-bold mb-3">Por tipo</p>
-                        <div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
-                            <span
-                                class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Aliados</span>
-                            <span id="countAliado" class="text-sm font-serif text-on-surface font-bold">0</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
-                            <span
-                                class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Oros</span>
-                            <span id="countOro" class="text-sm font-serif text-on-surface font-bold">0</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
-                            <span
-                                class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Talismanes</span>
-                            <span id="countTalisman" class="text-sm font-serif text-on-surface font-bold">0</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
-                            <span
-                                class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Armas</span>
-                            <span id="countArma" class="text-sm font-serif text-on-surface font-bold">0</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2">
-                            <span
-                                class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Tótems</span>
-                            <span id="countTotem" class="text-sm font-serif text-on-surface font-bold">0</span>
+                    <!-- Mitad inferior: Lista de cartas seleccionadas -->
+                    <div class="h-1/2 flex flex-col overflow-hidden">
+                        <p class="text-[9px] uppercase tracking-widest text-outline font-bold px-3 pt-2 pb-1 shrink-0">Cartas seleccionadas</p>
+                        <div id="deckCardList" class="flex-1 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5">
+                            <p class="text-outline/40 font-serif italic text-xs text-center mt-3">Sin cartas</p>
                         </div>
                     </div>
                 </div>
@@ -620,8 +649,30 @@
             });
 
             const total = cartasSeleccionadas.length;
-            const texto = `${total}/49\n\nAliados: ${tipos.aliado}\nOros: ${tipos.oro}\nTalismanes: ${tipos.talisman}\nArmas: ${tipos.arma}\nTótems: ${tipos.totem}`;
-            document.getElementById('deckList').value = texto;
+
+            // Actualizar input oculto para el form
+            const hiddenInput = document.getElementById('deckList');
+            if (hiddenInput) hiddenInput.value = `${total}/49 — Aliados:${tipos.aliado} Oros:${tipos.oro} Talismanes:${tipos.talisman} Armas:${tipos.arma} Tótems:${tipos.totem}`;
+
+            // Actualizar display visual en la página principal
+            const emptyEl = document.getElementById('deckListEmpty');
+            const contentEl = document.getElementById('deckListContent');
+            const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            if (total > 0) {
+                if (emptyEl) emptyEl.classList.add('hidden');
+                if (contentEl) { contentEl.classList.remove('hidden'); contentEl.classList.add('flex'); }
+                setEl('dLCount', total);
+                setEl('dLAliado', tipos.aliado);
+                setEl('dLOro', tipos.oro);
+                setEl('dLTalisman', tipos.talisman);
+                setEl('dLArma', tipos.arma);
+                setEl('dLTotem', tipos.totem);
+            } else {
+                if (emptyEl) emptyEl.classList.remove('hidden');
+                if (contentEl) { contentEl.classList.add('hidden'); contentEl.classList.remove('flex'); }
+            }
+
             document.getElementById('cardSelectionModal').classList.add('hidden');
         };
 
@@ -686,7 +737,7 @@
                 const tipo = normalizeText(c.tipo);
                 if (tipo === 'aliado') tipos.aliado++;
                 else if (tipo === 'oro') tipos.oro++;
-                else if (tipo === 'talisman' || tipo === 'talisman') tipos.talisman++;
+                else if (tipo === 'talisman') tipos.talisman++;
                 else if (tipo === 'arma') tipos.arma++;
                 else if (tipo === 'totem') tipos.totem++;
             });
@@ -698,6 +749,48 @@
             if (el('countTalisman')) el('countTalisman').textContent = tipos.talisman;
             if (el('countArma')) el('countArma').textContent = tipos.arma;
             if (el('countTotem')) el('countTotem').textContent = tipos.totem;
+
+            window.renderizarListaCartas();
+        };
+
+        window.renderizarListaCartas = function () {
+            const container = document.getElementById('deckCardList');
+            if (!container) return;
+
+            // Agrupar por nombre
+            const grouped = {};
+            cartasSeleccionadas.forEach(c => {
+                if (!grouped[c.nombre]) grouped[c.nombre] = { carta: c, count: 0 };
+                grouped[c.nombre].count++;
+            });
+
+            const items = Object.values(grouped);
+
+            if (items.length === 0) {
+                container.innerHTML = '<p class="text-outline/40 font-serif italic text-xs text-center mt-3">Sin cartas</p>';
+                return;
+            }
+
+            container.innerHTML = items.map(({ carta, count }) => {
+                const secureNombre = (carta.nombre || '').replace(/'/g, "\\'");
+                const imgUrl = carta.imagen_url || '';
+                return `
+                    <div class="flex items-center gap-2 px-1.5 py-1 rounded-sm hover:bg-surface-container cursor-pointer transition-colors" onclick="window.quitarCarta('${secureNombre}')">
+                        ${imgUrl ? `<img src="${imgUrl}" class="w-7 h-auto rounded-sm shrink-0" />` : `<div class="w-7 h-9 bg-surface-container rounded-sm shrink-0 border border-outline-variant/20"></div>`}
+                        <span class="flex-1 text-[11px] font-serif text-on-surface truncate leading-tight">${carta.nombre}</span>
+                        <span class="text-[10px] font-black text-primary shrink-0">x${count}</span>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.quitarCarta = function (nombre) {
+            const idx = cartasSeleccionadas.map(c => c.nombre).lastIndexOf(nombre);
+            if (idx !== -1) {
+                cartasSeleccionadas.splice(idx, 1);
+                window.actualizarEstadoCartas();
+                window.actualizarPanelDerecho();
+            }
         };
 
         window.ocultarCartaGrande = function () {
