@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         let msj = ''
-        document.querySelectorAll('#deckForm input:not([type="hidden"]), #deckForm textarea, #deckForm select').forEach(item => {
+        document.querySelectorAll('#deckForm input:not([type="hidden"]), #deckForm textarea:not([readonly]), #deckForm select').forEach(item => {
             if (item.value.trim() == '') {
                 msj += `Debe ingresar el campo ${item.name} \n`
             }
@@ -49,10 +49,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 const deckNameEl = document.getElementById('deckName');
                 const deckExpansionEl = document.getElementById('deckExpansion');
                 const deckStrategyEl = document.getElementById('deckStrategy');
-                const deckDescEl = document.getElementById('deckDesc');
+                const deckRazaEl = document.getElementById('deckRaza');
                 const deckListEl = document.getElementById('deckList');
 
-                if (!deckNameEl || !deckExpansionEl || !deckStrategyEl || !deckDescEl || !deckListEl) {
+                if (!deckNameEl || !deckExpansionEl || !deckStrategyEl || !deckRazaEl || !deckListEl) {
                     throw new Error("No se encontraron todos los inputs del formulario en el DOM.");
                 }
 
@@ -61,7 +61,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         nombre: deckNameEl.value,
                         expansion: deckExpansionEl.value,
                         estrategia: deckStrategyEl.value,
-                        descripcion: deckDescEl.value,
+                        raza: deckRazaEl.value,
                         lista: deckListEl.value
                     }
                     console.log(datos)
@@ -71,7 +71,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         nombre: deckNameEl.value,
                         expansion: deckExpansionEl.value,
                         estrategia: deckStrategyEl.value,
-                        descripcion: deckDescEl.value,
+                        raza: deckRazaEl.value,
                         lista: deckListEl.value
                     }
                     await editData(id, datos)
@@ -91,7 +91,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
     getData((coleccion) => {
         let tabla = ''
+        let deckCount = 0;
+
         coleccion.forEach(doc => {
+            deckCount++;
             const datos = doc.data()
             tabla += `
             <!-- Deck Item -->
@@ -107,6 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="flex items-center gap-2 mt-1">
                         <span class="text-[10px] bg-primary/20 text-primary px-2 py-0.5 font-bold uppercase tracking-tighter">${datos.estrategia}</span>
                         <span class="text-[10px] text-outline uppercase tracking-widest font-medium">${datos.expansion}</span>
+                        ${datos.raza ? `<span class="text-[10px] text-outline uppercase tracking-widest font-medium border-l border-outline-variant/30 pl-2 ml-1">${datos.raza}</span>` : ''}
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -120,11 +124,30 @@ window.addEventListener('DOMContentLoaded', () => {
             </div>
             `
         })
+
         const deckContainer = document.getElementById('deckContainer');
+        if (deckCount === 0) {
+            tabla = '<p class="text-outline/60 text-center text-sm font-serif italic py-6">Aún no has creado ningún mazo.</p>';
+        }
         if (deckContainer) {
             deckContainer.innerHTML = tabla;
         } else {
             console.warn("Contenedor de mazos (deckContainer) no encontrado.");
+        }
+
+        // Actualizar contadores
+        const deckCounter = document.getElementById('deckCounter');
+        if (deckCounter) deckCounter.innerText = `${deckCount}/10 Mazos`;
+
+        let percentage = Math.floor((deckCount / 10) * 100);
+        if (percentage > 100) percentage = 100;
+
+        const storagePercentage = document.getElementById('storagePercentage');
+        if (storagePercentage) storagePercentage.innerText = `${percentage}%`;
+
+        const storageBar = document.getElementById('storageBar');
+        if (storageBar) {
+            storageBar.style.width = `${percentage}%`;
         }
 
         // permite eliminar el registro
@@ -142,7 +165,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 const datos = await getById(btn.id)
                 document.getElementById('deckName').value = datos.nombre
                 document.getElementById('deckExpansion').value = datos.expansion
-                document.getElementById('deckDesc').value = datos.descripcion
+                if (window.updateRaces) window.updateRaces(datos.expansion)
+                const razaSelect = document.getElementById('deckRaza');
+                if (razaSelect && datos.raza) razaSelect.value = datos.raza
                 document.getElementById('deckList').value = datos.lista
                 if (window.updateStrategy) window.updateStrategy(datos.estrategia)
                 id = btn.id
