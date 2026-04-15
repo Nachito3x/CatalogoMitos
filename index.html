@@ -331,7 +331,7 @@
             <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-surface-container-low relative">
                 <!-- Contenedor Izquierdo (Galería) -->
                 <div id="modalGallery"
-                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 content-start">
+                    class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-5 gap-4 content-start">
                     <!-- Las cartas se cargarán y renderizarán aquí -->
                 </div>
 
@@ -345,9 +345,15 @@
                 <!-- Contenedor Derecho -->
                 <div
                     class="w-full md:w-1/3 p-4 overflow-y-auto bg-surface-container-lowest/50 flex flex-col h-full space-y-4">
-                    <div class="border-b border-outline-variant/30 pb-3 shrink-0 space-y-4">
-                        <h4 id="selectedCountTitle" class="text-3xl font-serif text-primary tracking-tight">0/49</h4>
-                        <div class="text-xs text-outline-variant font-bold space-y-2">
+                    <div class="border-b border-outline-variant/30 pb-3 shrink-0">
+                        <h4
+                            class="text-lg font-serif text-primary uppercase tracking-widest flex items-center justify-between">
+                            Cartas Seleccionadas
+                            <span class="text-xs text-outline font-sans tracking-normal"><strong id="selectedCountUI"
+                                    class="text-on-surface">0</strong>/49</span>
+                        </h4>
+                        <div
+                            class="mt-3 text-[11px] uppercase tracking-widest text-outline-variant font-bold grid grid-cols-2 gap-y-2">
                             <p>Aliados: <span id="countAliadoUI" class="text-primary ml-1">0</span></p>
                             <p>Oros: <span id="countOroUI" class="text-primary ml-1">0</span></p>
                             <p>Talismanes: <span id="countTalismanUI" class="text-primary ml-1">0</span></p>
@@ -472,79 +478,16 @@
 
         let cartasPreFiltradas = [];
 
-        window.crearEstadoMazoVacio = function () {
-            return {
-                cartas: {},
-                total: 0,
-                stats: {
-                    'aliado': 0,
-                    'oro': 0,
-                    'talisman': 0,
-                    'arma': 0,
-                    'totem': 0
-                }
-            };
-        };
-
-        window.estadoMazo = window.crearEstadoMazoVacio();
-
-        window.resetEstadoMazo = function () {
-            window.estadoMazo = window.crearEstadoMazoVacio();
-            window.renderSelectedList();
-        };
-
-        window.obtenerResumenTipos = function () {
-            return `Aliados: ${window.estadoMazo.stats.aliado}
-Oros: ${window.estadoMazo.stats.oro}
-Talismanes: ${window.estadoMazo.stats.talisman}
-Armas: ${window.estadoMazo.stats.arma}
-TÃ³tems: ${window.estadoMazo.stats.totem}`;
-        };
-
-        window.syncDeckSummaryFields = function () {
-            const ids = [];
-            Object.values(window.estadoMazo.cartas).forEach(item => {
-                for (let i = 0; i < item.cantidad; i++) {
-                    ids.push(item.data.id);
-                }
-            });
-
-            document.getElementById('deckIds').value = ids.join(',');
-            document.getElementById('deckList').value = window.obtenerResumenTipos();
-        };
-
-        window.hidratarEstadoMazoDesdeIds = function () {
-            const deckIdsValue = (document.getElementById('deckIds').value || '').trim();
-
-            window.resetEstadoMazo();
-            if (!deckIdsValue) {
-                window.syncDeckSummaryFields();
-                return;
+        window.estadoMazo = {
+            cartas: {},
+            total: 0,
+            stats: {
+                'aliado': 0,
+                'oro': 0,
+                'talisman': 0,
+                'arma': 0,
+                'totem': 0
             }
-
-            const ids = deckIdsValue
-                .split(',')
-                .map(id => Number(String(id).trim()))
-                .filter(id => !Number.isNaN(id));
-
-            const cartasPorId = new Map(cartasData.map(carta => [Number(carta.id), carta]));
-            ids.forEach(id => {
-                const carta = cartasPorId.get(id);
-                if (!carta) return;
-
-                if (!window.estadoMazo.cartas[carta.nombre]) {
-                    window.estadoMazo.cartas[carta.nombre] = { data: carta, cantidad: 1 };
-                } else {
-                    window.estadoMazo.cartas[carta.nombre].cantidad++;
-                }
-
-                window.estadoMazo.total++;
-                const tipoNorm = window.getTipoNormalizado(carta.tipo);
-                if (window.estadoMazo.stats[tipoNorm] !== undefined) window.estadoMazo.stats[tipoNorm]++;
-            });
-
-            window.renderSelectedList();
-            window.syncDeckSummaryFields();
         };
 
         // Abrir y cargar modal renderizado con las variables seleccionadas
@@ -559,7 +502,6 @@ TÃ³tems: ${window.estadoMazo.stats.totem}`;
 
             // Mostrar modal inmediatamente
             modal.classList.remove('hidden');
-            window.hidratarEstadoMazoDesdeIds();
 
             const gallery = document.getElementById('modalGallery');
             gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50"><span class="material-symbols-outlined animate-spin text-4xl" style="animation: spin 2s linear infinite;">sync</span><span class="ml-3 font-serif italic text-sm">Forjando visuales...</span></div>';
@@ -781,153 +723,6 @@ Tótems: ${window.estadoMazo.stats.totem}`;
             window.showToast('Mazo guardado correctamente para su consagración.', 'success');
 
             // Cerrar modal
-            document.getElementById('cardSelectionModal').classList.add('hidden');
-        };
-
-        window.filtrarGaleria = function () {
-            const gallery = document.getElementById('modalGallery');
-            const searchVal = (document.getElementById('modalSearchInput').value || '').toLowerCase();
-            const typeVal = document.getElementById('modalTypeFilter').value.toLowerCase();
-
-            let finalCards = cartasPreFiltradas;
-
-            if (searchVal) {
-                const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                const searchNorm = normalizeText(searchVal);
-                finalCards = finalCards.filter(c => normalizeText(c.nombre).includes(searchNorm));
-            }
-
-            if (typeVal !== 'todo') {
-                const typeNorm = typeVal === 'talisman' ? 'talisman' : (typeVal === 'totem' ? 'totem' : typeVal);
-                const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-                finalCards = finalCards.filter(c => normalizeText(c.tipo) === typeNorm);
-            }
-
-            if (finalCards.length === 0) {
-                gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50 font-serif italic text-sm">No se encontraron reliquias con esos filtros.</div>';
-                return;
-            }
-
-            gallery.innerHTML = finalCards.map(carta => {
-                const secureImgUrl = carta.imagen_url ? carta.imagen_url.replace(/'/g, "\\'") : '';
-                const secureName = carta.nombre ? carta.nombre.replace(/'/g, "\\'") : 'Reliquia';
-                const cartaJSON = encodeURIComponent(JSON.stringify(carta));
-                const countEnMazo = window.estadoMazo.cartas[carta.nombre] ? window.estadoMazo.cartas[carta.nombre].cantidad : 0;
-                const isDisabled = countEnMazo >= 3 || window.estadoMazo.total >= 49;
-                const disabledClasses = isDisabled
-                    ? "opacity-45 saturate-0 cursor-not-allowed"
-                    : "hover:-translate-y-1 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.45)] cursor-pointer";
-
-                return `
-                    <div class="relative group transition-all transform-gpu duration-200 border rounded-md ${disabledClasses} overflow-hidden bg-surface-container ${countEnMazo > 0 ? 'border-primary/50 shadow-[0_0_0_1px_rgba(242,202,80,0.15)]' : 'border-transparent'}" title="${carta.nombre} - ${carta.tipo}">
-                        <button type="button" ${isDisabled ? 'disabled' : ''} onclick="${isDisabled ? '' : `window.agregarCartaMazo('${cartaJSON}')`}" class="absolute inset-0 z-10 w-full h-full" aria-label="Seleccionar ${carta.nombre}"></button>
-                        ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto block" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
-                        <div class="absolute top-2 right-2 z-20 min-w-7 px-2 py-1 rounded-full bg-black/80 text-[10px] font-black text-primary text-center border border-primary/20">
-                            x${countEnMazo}
-                        </div>
-                        <div class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[#050505] via-[#050505]/92 to-transparent px-2 pb-2 pt-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" onclick="event.stopPropagation(); window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')" class="w-full flex items-center justify-center gap-2 bg-black/80 hover:bg-black text-[#f2ca50] hover:text-white border border-[#e9c349]/30 rounded-sm px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" class="w-4 h-4 fill-none stroke-current stroke-[1.8]">
-                                    <path d="M1.5 12s3.8-6.5 10.5-6.5S22.5 12 22.5 12 18.7 18.5 12 18.5 1.5 12 1.5 12Z"></path>
-                                    <circle cx="12" cy="12" r="3.2"></circle>
-                                </svg>
-                                Detalle
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        window.agregarCartaMazo = function (cartaEncoded) {
-            const carta = JSON.parse(decodeURIComponent(cartaEncoded));
-            const count = window.estadoMazo.cartas[carta.nombre] ? window.estadoMazo.cartas[carta.nombre].cantidad : 0;
-
-            if (count >= 3) return;
-            if (window.estadoMazo.total >= 49) return;
-
-            if (!window.estadoMazo.cartas[carta.nombre]) {
-                window.estadoMazo.cartas[carta.nombre] = { data: carta, cantidad: 1 };
-            } else {
-                window.estadoMazo.cartas[carta.nombre].cantidad++;
-            }
-
-            window.estadoMazo.total++;
-            const tipoNorm = window.getTipoNormalizado(carta.tipo);
-            if (window.estadoMazo.stats[tipoNorm] !== undefined) window.estadoMazo.stats[tipoNorm]++;
-
-            window.renderSelectedList();
-            window.syncDeckSummaryFields();
-            window.filtrarGaleria();
-        };
-
-        window.quitarCartaMazo = function (nombreEncoded) {
-            const nombre = decodeURIComponent(nombreEncoded);
-            if (!window.estadoMazo.cartas[nombre]) return;
-
-            const carta = window.estadoMazo.cartas[nombre].data;
-            window.estadoMazo.cartas[nombre].cantidad--;
-            window.estadoMazo.total--;
-
-            const tipoNorm = window.getTipoNormalizado(carta.tipo);
-            if (window.estadoMazo.stats[tipoNorm] !== undefined) window.estadoMazo.stats[tipoNorm]--;
-
-            if (window.estadoMazo.cartas[nombre].cantidad <= 0) {
-                delete window.estadoMazo.cartas[nombre];
-            }
-
-            window.renderSelectedList();
-            window.syncDeckSummaryFields();
-            window.filtrarGaleria();
-        };
-
-        window.renderSelectedList = function () {
-            document.getElementById('selectedCountTitle').innerText = `${window.estadoMazo.total}/49`;
-            document.getElementById('countAliadoUI').innerText = window.estadoMazo.stats.aliado;
-            document.getElementById('countOroUI').innerText = window.estadoMazo.stats.oro;
-            document.getElementById('countTalismanUI').innerText = window.estadoMazo.stats.talisman;
-            document.getElementById('countArmaUI').innerText = window.estadoMazo.stats.arma;
-            document.getElementById('countTotemUI').innerText = window.estadoMazo.stats.totem;
-
-            const container = document.getElementById('selectedListUI');
-            const items = Object.values(window.estadoMazo.cartas).sort((a, b) => a.data.nombre.localeCompare(b.data.nombre, 'es'));
-
-            if (items.length === 0) {
-                container.innerHTML = '<div class="text-center text-outline/40 italic font-serif text-sm mt-10">Ninguna reliquia forjada aÃºn...</div>';
-                return;
-            }
-
-            container.innerHTML = items.map(item => {
-                const nombreEnc = encodeURIComponent(item.data.nombre);
-                const img = item.data.imagen_url ? item.data.imagen_url : '';
-                return `
-                    <div onclick="window.quitarCartaMazo('${nombreEnc}')" class="flex items-center gap-3 p-2 bg-surface-container rounded cursor-pointer hover:bg-surface-container-high border border-transparent hover:border-error-container/50 transition-colors group">
-                        <div class="h-10 w-7 shrink-0 bg-surface-container-lowest flex items-center justify-center overflow-hidden rounded-sm relative">
-                            ${img ? `<img src="${img}" class="object-cover w-full h-full">` : '<span class="material-symbols-outlined text-[10px] text-outline/40">image</span>'}
-                            <div class="absolute inset-0 bg-error-container/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span class="material-symbols-outlined text-on-surface text-[14px]">remove</span>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs text-on-surface font-bold truncate">${item.data.nombre}</p>
-                            <p class="text-[10px] text-primary/80 uppercase truncate">${item.data.tipo}</p>
-                        </div>
-                        <div class="shrink-0 text-sm font-black text-outline group-hover:text-error-container transition-colors">
-                            x${item.cantidad}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        window.guardarMazoModal = function () {
-            if (window.estadoMazo.total !== 49) {
-                window.showToast(`Debes forjar exactamente 49 reliquias. Te faltan ${49 - window.estadoMazo.total}.`, 'error');
-                return;
-            }
-
-            window.syncDeckSummaryFields();
-            window.showToast('Mazo guardado correctamente para su consagraciÃ³n.', 'success');
             document.getElementById('cardSelectionModal').classList.add('hidden');
         };
     </script>

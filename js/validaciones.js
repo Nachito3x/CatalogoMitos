@@ -12,12 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
         deckForm.addEventListener('reset', () => {
             setTimeout(() => {
                 if (window.updateStrategy) window.updateStrategy('Agro'); // valor por defecto al resetear
-                const deckIdsEl = document.getElementById('deckIds');
-                const deckListEl = document.getElementById('deckList');
-                if (deckIdsEl) deckIdsEl.value = '';
-                if (deckListEl) deckListEl.value = '';
-                if (window.resetEstadoMazo) window.resetEstadoMazo();
-                if (window.syncDeckSummaryFields) window.syncDeckSummaryFields();
                 id = '';
             }, 10);
         });
@@ -57,20 +51,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 const deckStrategyEl = document.getElementById('deckStrategy');
                 const deckRazaEl = document.getElementById('deckRaza');
                 const deckListEl = document.getElementById('deckList');
-                const deckIdsEl = document.getElementById('deckIds');
 
-                if (!deckNameEl || !deckExpansionEl || !deckStrategyEl || !deckRazaEl || !deckListEl || !deckIdsEl) {
+                if (!deckNameEl || !deckExpansionEl || !deckStrategyEl || !deckRazaEl || !deckListEl) {
                     throw new Error("No se encontraron todos los inputs del formulario en el DOM.");
-                }
-
-                const idsSeleccionadas = deckIdsEl.value
-                    .split(',')
-                    .map(item => item.trim())
-                    .filter(Boolean);
-
-                if (idsSeleccionadas.length !== 49) {
-                    window.showToast('Debes guardar temporalmente un mazo de 49 cartas antes de consagrarlo.', 'error');
-                    return false;
                 }
 
                 if (id == '') {
@@ -79,8 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         expansion: deckExpansionEl.value,
                         estrategia: deckStrategyEl.value,
                         raza: deckRazaEl.value,
-                        lista: deckListEl.value,
-                        deckIds: deckIdsEl.value
+                        lista: deckListEl.value
                     }
                     console.log(datos)
                     await save(datos)
@@ -90,8 +72,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         expansion: deckExpansionEl.value,
                         estrategia: deckStrategyEl.value,
                         raza: deckRazaEl.value,
-                        lista: deckListEl.value,
-                        deckIds: deckIdsEl.value
+                        lista: deckListEl.value
                     }
                     await editData(id, datos)
                     id = ''
@@ -188,8 +169,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 const razaSelect = document.getElementById('deckRaza');
                 if (razaSelect && datos.raza) razaSelect.value = datos.raza
                 document.getElementById('deckList').value = datos.lista
-                document.getElementById('deckIds').value = datos.deckIds || ''
-                if (window.hidratarEstadoMazoDesdeIds) window.hidratarEstadoMazoDesdeIds()
                 if (window.updateStrategy) window.updateStrategy(datos.estrategia)
                 id = btn.id
             })
