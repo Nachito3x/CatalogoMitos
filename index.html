@@ -318,10 +318,9 @@
                         <option value="totem">Tótem</option>
                     </select>
                     <div class="flex gap-2 ml-auto md:ml-0">
-                        <button type="button"
-                            onclick="document.getElementById('cardSelectionModal').classList.add('hidden')"
+                        <button type="button" onclick="window.cancelarSeleccion()"
                             class="px-4 py-2 border border-outline-variant text-outline text-xs font-bold uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-colors rounded-sm">Cancelar</button>
-                        <button type="button"
+                        <button type="button" onclick="window.guardarSeleccion()"
                             class="px-4 py-2 border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors rounded-sm shadow-md">Guardar</button>
                     </div>
                 </div>
@@ -484,6 +483,7 @@
         let cartasData = [];
         let finalCardsRendered = [];
         let cartasSeleccionadas = [];
+        let cartasSeleccionadasSnapshot = [];
 
         // Cargar cartas JSON original al iniciar de forma asíncrona
         fetch('./json/Cartas_tionacho.json')
@@ -504,6 +504,9 @@
             // Limpiamos los filtros del modal para no arrastrar busquedas anteriores
             document.getElementById('modalSearchInput').value = '';
             document.getElementById('modalTypeFilter').value = 'todo';
+
+            // Guardar snapshot para poder cancelar
+            cartasSeleccionadasSnapshot = [...cartasSeleccionadas];
 
             // Mostrar modal inmediatamente
             modal.classList.remove('hidden');
@@ -595,6 +598,31 @@
                 imgEl.classList.remove('scale-95');
                 imgEl.classList.add('scale-100');
             }, 10);
+        };
+
+        window.cancelarSeleccion = function () {
+            cartasSeleccionadas = [...cartasSeleccionadasSnapshot];
+            window.actualizarEstadoCartas();
+            window.actualizarPanelDerecho();
+            document.getElementById('cardSelectionModal').classList.add('hidden');
+        };
+
+        window.guardarSeleccion = function () {
+            const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const tipos = { aliado: 0, oro: 0, talisman: 0, arma: 0, totem: 0 };
+            cartasSeleccionadas.forEach(c => {
+                const tipo = normalizeText(c.tipo);
+                if (tipo === 'aliado') tipos.aliado++;
+                else if (tipo === 'oro') tipos.oro++;
+                else if (tipo === 'talisman') tipos.talisman++;
+                else if (tipo === 'arma') tipos.arma++;
+                else if (tipo === 'totem') tipos.totem++;
+            });
+
+            const total = cartasSeleccionadas.length;
+            const texto = `${total}/49\n\nAliados: ${tipos.aliado}\nOros: ${tipos.oro}\nTalismanes: ${tipos.talisman}\nArmas: ${tipos.arma}\nTótems: ${tipos.totem}`;
+            document.getElementById('deckList').value = texto;
+            document.getElementById('cardSelectionModal').classList.add('hidden');
         };
 
         window.seleccionarCarta = function (idx) {
