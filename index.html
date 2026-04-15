@@ -206,8 +206,7 @@
                             </div>
                             <div
                                 class="flex justify-center items-center bg-surface-container-lowest rounded-sm border border-outline-variant/10 p-4">
-                                <button type="button"
-                                    onclick="document.getElementById('cardSelectionModal').classList.remove('hidden')"
+                                <button type="button" onclick="window.abrirModalSeleccionCartas()"
                                     class="px-6 py-3 border border-primary/40 bg-primary/10 text-primary text-sm font-bold uppercase tracking-widest hover:bg-primary/20 transition-colors shadow-sm w-full md:w-auto text-center">
                                     Seleccionar cartas
                                 </button>
@@ -414,6 +413,58 @@
                 opt.textContent = raza;
                 razaSelect.appendChild(opt);
             });
+        };
+
+        let cartasData = [];
+
+        // Cargar cartas JSON original al iniciar de forma asíncrona
+        fetch('./json/Cartas_tionacho.json')
+            .then(res => res.json())
+            .then(data => {
+                cartasData = data;
+            })
+            .catch(err => console.error("Error cargando cartas localmente:", err));
+
+        // Abrir y cargar modal renderizado con las variables seleccionadas
+        window.abrirModalSeleccionCartas = function () {
+            const modal = document.getElementById('cardSelectionModal');
+            const expansion = document.getElementById('deckExpansion').value;
+            const raza = document.getElementById('deckRaza').value;
+
+            // Mostrar modal inmediatamente
+            modal.classList.remove('hidden');
+
+            const gallery = document.getElementById('modalGallery');
+            gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50"><span class="material-symbols-outlined animate-spin text-4xl" style="animation: spin 2s linear infinite;">sync</span><span class="ml-3 font-serif italic text-sm">Forjando visuales...</span></div>';
+
+            // Usamos setTimeout(0) para ceder ejecución al paint del browser
+            setTimeout(() => {
+                const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace('faire', 'faerie').trim();
+                const expFiltro = normalizeText(expansion);
+                const razaFiltro = normalizeText(raza);
+
+                const cartasFiltradas = cartasData.filter(c =>
+                    normalizeText(c.expansion) === expFiltro && normalizeText(c.raza) === razaFiltro
+                );
+
+                if (cartasFiltradas.length === 0) {
+                    gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50 font-serif italic text-sm">No hay reliquias forjadas para esta Expansión y Raza combinadas.</div>';
+                    return;
+                }
+
+                // Procesar variables para una visualización optimizada de galería
+                gallery.innerHTML = cartasFiltradas.map(carta => `
+                    <div class="relative group cursor-pointer border border-outline-variant/20 rounded-md overflow-hidden bg-surface-container hover:border-primary/50 transition-colors shadow-lg hover:shadow-primary/10 hover:-translate-y-1 duration-300">
+                        <div class="aspect-[7/10] w-full bg-surface-container-lowest flex items-center justify-center overflow-hidden">
+                            ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src=''; this.parentElement.innerHTML='<span class=\\'text-[10px] text-outline/40 uppercase tracking-widest font-bold text-center\\'>Reliquia Perdida</span>';">` : `<span class="text-[10px] uppercase font-bold text-outline/40 tracking-widest text-center">Reliquia Perdida</span>`}
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-[#131313] via-[#131313]/90 to-transparent">
+                            <p class="text-xs text-[#f2ca50] font-black uppercase tracking-wider truncate drop-shadow-md">${carta.nombre}</p>
+                            <p class="text-[10px] text-on-surface-variant truncate font-medium mt-0.5">${carta.tipo || '-'} ${carta.coste_oro !== undefined && carta.coste_oro !== null && carta.coste_oro !== "" ? `<span class="text-primary/50 mx-1">•</span> <span class="text-primary font-bold"><span class="material-symbols-outlined text-[10px] align-middle" data-icon="paid" style="font-variation-settings: 'FILL' 1;">paid</span>${carta.coste_oro}</span>` : ''}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }, 50);
         };
     </script>
     <script type="module" src="js/validaciones.js"></script>
