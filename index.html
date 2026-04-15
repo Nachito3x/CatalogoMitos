@@ -283,10 +283,10 @@
                         <span
                             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm"
                             data-icon="search">search</span>
-                        <input type="text" placeholder="Buscar..."
+                        <input type="text" id="modalSearchInput" placeholder="Buscar..." oninput="window.filtrarGaleria()"
                             class="w-full md:w-48 bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-2 pl-9 pr-3 rounded-sm text-sm font-serif placeholder:text-outline/40">
                     </div>
-                    <select
+                    <select id="modalTypeFilter" onchange="window.filtrarGaleria()"
                         class="bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary text-on-surface py-2 px-3 rounded-sm text-sm font-serif">
                         <option value="todo">Todo</option>
                         <option value="aliado">Aliado</option>
@@ -305,12 +305,18 @@
                 </div>
             </div>
             <!-- Contenedores Izquierda y Derecha -->
-            <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-surface-container-low">
+            <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-surface-container-low relative">
                 <!-- Contenedor Izquierdo (Galería) -->
                 <div id="modalGallery"
                     class="w-full md:w-2/3 border-b md:border-b-0 md:border-r border-outline-variant/30 p-4 overflow-y-auto grid grid-cols-4 gap-4 content-start">
                     <!-- Las cartas se cargarán y renderizarán aquí -->
                 </div>
+                
+                <!-- Overlay de carta grande (Oculto por defecto) -->
+                <div id="modalImageOverlay" onclick="window.ocultarCartaGrande()" class="hidden absolute top-0 left-0 w-full md:w-2/3 h-full bg-[#0a0a0a]/90 z-50 items-center justify-center p-4 cursor-zoom-out backdrop-blur-sm transition-opacity duration-200">
+                    <img id="modalBigImage" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl drop-shadow-[0_0_40px_rgba(242,202,80,0.4)] transition-transform scale-95 duration-200">
+                </div>
+
                 <!-- Contenedor Derecho -->
                 <div class="w-full md:w-1/3 p-4 overflow-y-auto bg-surface-container-lowest/50">
 
@@ -425,11 +431,16 @@
             })
             .catch(err => console.error("Error cargando cartas localmente:", err));
 
+        let cartasPreFiltradas = [];
+
         // Abrir y cargar modal renderizado con las variables seleccionadas
         window.abrirModalSeleccionCartas = function () {
             const modal = document.getElementById('cardSelectionModal');
             const expansion = document.getElementById('deckExpansion').value;
-            const raza = document.getElementById('deckRaza').value;
+
+            // Limpiamos los filtros del modal para no arrastrar busquedas anteriores
+            document.getElementById('modalSearchInput').value = '';
+            document.getElementById('modalTypeFilter').value = 'todo';
 
             // Mostrar modal inmediatamente
             modal.classList.remove('hidden');
@@ -441,24 +452,80 @@
             setTimeout(() => {
                 const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace('faire', 'faerie').trim();
                 const expFiltro = normalizeText(expansion);
-                const razaFiltro = normalizeText(raza);
 
-                const cartasFiltradas = cartasData.filter(c =>
-                    normalizeText(c.expansion) === expFiltro && normalizeText(c.raza) === razaFiltro
+                cartasPreFiltradas = cartasData.filter(c =>
+                    normalizeText(c.expansion) === expFiltro
                 );
 
-                if (cartasFiltradas.length === 0) {
-                    gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50 font-serif italic text-sm">No hay reliquias forjadas para esta Expansión y Raza combinadas.</div>';
-                    return;
-                }
+                window.filtrarGaleria();
+            }, 50);
+        };
 
-                // Procesar variables para una visualización optimizada de galería
-                gallery.innerHTML = cartasFiltradas.map(carta => `
-                    <div class="relative cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(242,202,80,0.3)] duration-200" title="${carta.nombre} - ${carta.tipo}">
+        window.filtrarGaleria = function () {
+            const gallery = document.getElementById('modalGallery');
+            const searchVal = (document.getElementById('modalSearchInput').value || '').toLowerCase();
+            const typeVal = document.getElementById('modalTypeFilter').value.toLowerCase();
+
+            let finalCards = cartasPreFiltradas;
+
+            if (searchVal) {
+                const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                const searchNorm = normalizeText(searchVal);
+                finalCards = finalCards.filter(c => normalizeText(c.nombre).includes(searchNorm));
+            }
+
+            if (typeVal !== 'todo') {
+                const typeNorm = typeVal === 'talisman' ? 'talisman' : (typeVal === 'totem' ? 'totem' : typeVal);
+                const normalizeText = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                finalCards = finalCards.filter(c => normalizeText(c.tipo) === typeNorm);
+            }
+
+            if (finalCards.length === 0) {
+                gallery.innerHTML = '<div class="col-span-full h-48 flex items-center justify-center text-outline/50 font-serif italic text-sm">No se encontraron reliquias con esos filtros.</div>';
+                return;
+            }
+
+            gallery.innerHTML = finalCards.map(carta => {
+                const secureImgUrl = carta.imagen_url ? carta.imagen_url.replace(/'/g, "\\'") : '';
+                const secureName = carta.nombre ? carta.nombre.replace(/'/g, "\\'") : 'Reliquia';
+                return `
+                    <div class="relative cursor-zoom-in transition-transform transform-gpu hover:scale-110 hover:z-10 hover:shadow-[0_0_20px_rgba(242,202,80,0.5)] duration-200" title="${carta.nombre} - ${carta.tipo}" onclick="window.mostrarCartaGrande('${secureImgUrl}', '${secureName}')">
                         ${carta.imagen_url ? `<img src="${carta.imagen_url}" loading="lazy" alt="Imagen ${carta.nombre}" class="w-full h-auto rounded-md shadow-md" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2\\'>Reliquia Perdida<br>${carta.nombre}</div>';">` : `<div class="aspect-[7/10] w-full bg-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 text-outline/40 uppercase tracking-widest font-bold text-[10px] text-center p-2">Reliquia Perdida<br>${carta.nombre}</div>`}
                     </div>
-                `).join('');
-            }, 50);
+                `;
+            }).join('');
+        };
+
+        window.mostrarCartaGrande = function (imgUrl, nombre) {
+            if (!imgUrl) return;
+            const container = document.getElementById('modalImageOverlay');
+            const imgEl = document.getElementById('modalBigImage');
+            imgEl.src = imgUrl;
+            imgEl.alt = nombre;
+            
+            // Render visible but faded out
+            container.classList.remove('hidden');
+            container.classList.add('flex');
+            
+            // Trigger animation
+            setTimeout(() => {
+                imgEl.classList.remove('scale-95');
+                imgEl.classList.add('scale-100');
+            }, 10);
+        };
+
+        window.ocultarCartaGrande = function () {
+            const container = document.getElementById('modalImageOverlay');
+            const imgEl = document.getElementById('modalBigImage');
+            
+            imgEl.classList.remove('scale-100');
+            imgEl.classList.add('scale-95');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+                imgEl.src = "";
+            }, 200);
         };
     </script>
     <script type="module" src="js/validaciones.js"></script>
